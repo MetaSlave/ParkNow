@@ -1,0 +1,81 @@
+﻿@page "/route"
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject IJSRuntime JSRuntime
+@inject ILogger<Route> Logger
+
+<link rel="stylesheet" href="js/leaflet/leaflet.css" />
+<script src="js/leaflet/leaflet.js"></script>
+<link rel="stylesheet" href="js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.css" />
+<script src="js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<PageTitle>Navigate</PageTitle>
+
+<div id="map" style="height: 80vh;width: 100%;"> </div>
+
+<script>
+function initializeMap(dotNetHelper) {
+    var map = L.map('map', {
+        center: [1.3686323149474335,103.84452368184051],
+        zoom: 17
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.Routing.control({
+        waypoints: [
+            L.latLng(1.3779868065283465,103.84260221150643),
+            L.latLng(1.3670348671904478,103.83818076351676)
+        ],
+        routeWhileDragging: true
+    })
+    .on('routesfound', function(e) {
+        var routes = e.routes;
+        var simplifiedRoutes = routes.map(function(route) {
+            return {
+                summary: route.summary,
+                coordinates: route.coordinates.map(function(coord) {
+                    return [coord.lat, coord.lng];
+                }),
+                instructions: route.instructions.map(function(instruction) {
+                    return {
+                        type: instruction.type,
+                        text: instruction.text,
+                        distance: instruction.distance,
+                        time: instruction.time,
+                    };
+                }),
+            };
+        });
+        var routesJson = JSON.stringify(simplifiedRoutes);
+        dotNetHelper.invokeMethodAsync('ReceiveRoutes', routesJson);
+    })
+    .addTo(map);
+}
+</script>
+
+@code {
+    private DotNetObjectReference<Route>? dotNetHelper;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetHelper = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("initializeMap", dotNetHelper);
+        }
+    }
+
+    [JSInvokable]
+    public void ReceiveRoutes(string routesData)
+    {
+        Logger.LogInformation(routesData);
+    }
+
+    public void Dispose()
+    {
+        dotNetHelper?.Dispose();
+    }
+}

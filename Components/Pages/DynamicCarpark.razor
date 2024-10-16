@@ -1,0 +1,232 @@
+﻿@page "/carparks/{carparkid}"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
+@using ParkNow.Models
+@attribute [Authorize]
+@inject IJSRuntime JSRuntime
+@inject ICarparkService CarparkService
+@inject IVehicleService VehicleService
+@inject IBookingService BookingService
+@inject IUserService UserService
+@inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILogger<DynamicCarpark> Logger
+
+<link rel="stylesheet" href="js/leaflet/leaflet.css" />
+<script src="js/leaflet/leaflet.js"></script>
+<style>
+.mud-popover:has(.mud-picker) {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%,-50%) !important;
+}
+</style>
+
+<div class="mt-8 d-flex justify-center align-center flex-column flex-grow-1 gap-4">
+        <MudText class="mr-2"Typo="Typo.h6">
+            @if (Carpark != null) {
+                @("Carpark: " + Carpark.CarparkId)
+            }
+        </MudText>
+        <MudText class="mr-2"Typo="Typo.h6">
+            @if (Carpark != null) {
+                @Carpark.Address 
+            }
+        </MudText>
+        <div id="map" style="height: 325px;width: 325px;"> </div>
+        <EditForm FormName="book" Model="@model" OnValidSubmit="Book">
+            <DataAnnotationsValidator/>
+                <MudCard style="height: 300px;width: 325px;">
+                    <MudCardContent>
+                        <MudSelect @bind-Value="model.Vehicle" Placeholder="Select Vehicle" AdornmentIcon="@Icons.Material.Filled.DirectionsCarFilled" >
+                            @foreach (Vehicle v in Vehicles) {
+                                <MudSelectItem Value="@v.LicensePlate">@v.LicensePlate</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-3">
+                            <div><MudText Typo="Typo.h6">Start</MudText></div>
+                            <div><MudText Typo="Typo.h6">End</MudText></div>
+                        </div>
+                        <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-2">
+                            <MudTimePicker Color="Color.Secondary" Time="@model.StartTime" MinuteSelectionStep="1" OpenTo="OpenTo.Minutes" TimeChanged="@(time => UpdateStartTime(time))"/>
+                            <MudTimePicker Color="Color.Secondary" Time="@model.EndTime" MinuteSelectionStep="1" OpenTo="OpenTo.Minutes" TimeChanged="@(time => UpdateEndTime(time))"/>
+                        </div>
+                        <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
+                            <MudDatePicker Color="Color.Secondary" Date="@model.StartDate" DateChanged="@(date => UpdateStartDate(date))"/>
+                            <MudDatePicker Color="Color.Secondary" Date="@model.EndDate" DateChanged="@(date => UpdateEndDate(date))"/>
+                        </div>
+                        <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText></div>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudStaticButton FullWidth FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary" Class="mb-2">Book</MudStaticButton>
+                    </MudCardActions>
+                </MudCard>
+        </EditForm>
+</div>
+<script>
+    function initializeMap(lat, long) {
+        var map = L.map('map', {
+            center: [lat,long],
+            zoom: 17
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map); // Added tile layer for map rendering
+        var marker = L.marker([lat,long]).addTo(map);
+    }
+</script>
+@code {
+    [Parameter]
+    public string carparkid { get; set; }
+    public Carpark Carpark = null;
+    private List<Vehicle> Vehicles = new List<Vehicle>();
+    private decimal price = 0;
+    private string username;
+
+    [SupplyParameterFromForm]
+    private BookingForm model { get; set; } = new();
+    public class BookingForm
+    {
+        [Required]
+        public string? Carpark { get; set; }
+        public string? Vehicle { get; set; }
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+        public TimeSpan? StartTime { get; set; }
+
+        public TimeSpan? EndTime { get; set; }
+
+        public DateTime? GetStartDateTime()
+        {
+            return StartDate.HasValue && StartTime.HasValue
+                ? StartDate.Value.Date + StartTime.Value
+                : (DateTime?)null;
+        }
+
+        public DateTime? GetEndDateTime()
+        {
+            return EndDate.HasValue && EndTime.HasValue
+                ? EndDate.Value.Date + EndTime.Value
+                : (DateTime?)null;
+        }
+    }
+
+    protected override async Task OnInitializedAsync() {
+        Carpark = await CarparkService.GetCarpark(carparkid);
+        var authState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+        username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
+        Vehicles = await VehicleService.GetUserVehicles(username);
+        model.StartDate = DateTime.Now;
+        model.StartTime = DateTime.Now.TimeOfDay;
+        model.Carpark = carparkid;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Carpark != null) // Ensure the map initializes only once
+        {
+            await RenderMap();
+        }
+    }
+
+    private async Task RenderMap() {
+        await JSRuntime.InvokeVoidAsync("initializeMap",Convert.ToDouble(Carpark.XCord),Convert.ToDouble(Carpark.YCord));
+    }
+
+    private async Task UpdateStartDate(DateTime? date) {
+        model.StartDate = date;
+        UpdatePrice();
+    }
+    private async Task UpdateEndDate(DateTime? date) {
+        model.EndDate = date;
+        UpdatePrice();
+    }
+    private async Task UpdateStartTime(TimeSpan? time) {
+        model.StartTime = time;
+        UpdatePrice();
+    }
+    private async Task UpdateEndTime(TimeSpan? time) {
+        model.EndTime = time;
+        UpdatePrice();
+    }
+
+    private async Task UpdatePrice() {
+        var startDateTime = model.GetStartDateTime();
+        var endDateTime = model.GetEndDateTime();
+
+        if (startDateTime.HasValue && endDateTime.HasValue) // Ensure values are not null
+        {
+            price = await BookingService.CalculatePrice(startDateTime.Value, endDateTime.Value, Carpark);
+        }
+    }
+
+    private async Task Book()
+    {
+        // Validate Booking
+        if (!ValidateBooking())
+        {
+            return;
+        }
+
+        // Add Booking
+        Booking temp = new Booking{
+            UserId = await UserService.GetUserid(username),
+            CarparkId = carparkid,
+            StartTime = model.GetStartDateTime(),
+            EndTime = model.GetEndDateTime(),
+            BookingTime = DateTime.Now,
+            Cost = price,
+            Status = Booking.Statuses.Active
+        };
+        bool createsuccess = await BookingService.CreateNewBooking(temp);
+        if (createsuccess) {
+            Snackbar.Add("Booking successful!", Severity.Success);
+        }
+    }
+
+    private bool ValidateBooking()
+    {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(model.Vehicle))
+        {
+            errors.Add("Vehicle is required");
+        }
+
+        var startDateTime = model.GetStartDateTime();
+        var endDateTime = model.GetEndDateTime();
+
+        if (!startDateTime.HasValue)
+        {
+            errors.Add("Start date and time are required");
+        }
+        else if (startDateTime.Value <= DateTime.Now)
+        {
+            errors.Add("Start date and time must be in the future");
+        }
+
+        if (endDateTime == null)
+        {
+            errors.Add("End date and time are required");
+        }
+        else if (endDateTime.Value <= startDateTime.Value)
+        {
+            errors.Add("End date and time must be after the start date and time");
+        }
+
+        if (errors.Any())
+        {
+            foreach (var error in errors)
+            {
+                Snackbar.Add(error, Severity.Error);
+            }
+            return false;
+        }
+
+        return true;
+    }
+}
