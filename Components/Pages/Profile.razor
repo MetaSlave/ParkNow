@@ -105,7 +105,6 @@
 
 @code {
     private IEnumerable<Vehicle> User_Vehicles = new List<Vehicle>();
-    private AuthenticationState context;
     private string profileView = "display:block;";   
     private string createVehicleView = "display:none;";
     private string editVehicleView = "display:none;";
@@ -207,6 +206,5 @@
         else {
             Snackbar.Add("Error creating vehicle", Severity.Error);
         }
-
     }
 }

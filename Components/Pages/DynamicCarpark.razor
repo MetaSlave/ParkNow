@@ -9,6 +9,7 @@
 @inject IBookingService BookingService
 @inject IUserService UserService
 @inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ILogger<DynamicCarpark> Logger
 
@@ -24,17 +25,18 @@
 </style>
 
 <div class="mt-8 d-flex justify-center align-center flex-column flex-grow-1 gap-4">
-        <MudText class="mr-2"Typo="Typo.h6">
-            @if (Carpark != null) {
-                @("Carpark: " + Carpark.CarparkId)
-            }
-        </MudText>
-        <MudText class="mr-2"Typo="Typo.h6">
-            @if (Carpark != null) {
-                @Carpark.Address 
-            }
-        </MudText>
-        <div id="map" style="height: 325px;width: 325px;"> </div>
+    <MudText class="mr-2"Typo="Typo.h6">
+        @if (Carpark != null) {
+            @("Carpark: " + Carpark.CarparkId)
+        }
+    </MudText>
+    <MudText class="mr-2"Typo="Typo.h6">
+        @if (Carpark != null) {
+            @Carpark.Address 
+        }
+    </MudText>
+    <div id="map" style="height: 325px;width: 325px;"> </div>
+    <div style="@bookView">
         <EditForm FormName="book" Model="@model" OnValidSubmit="Book">
             <DataAnnotationsValidator/>
                 <MudCard style="height: 300px;width: 325px;">
@@ -59,11 +61,37 @@
                         <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText></div>
                     </MudCardContent>
                     <MudCardActions>
-                        <MudStaticButton FullWidth FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary" Class="mb-2">Book</MudStaticButton>
+                        <MudStaticButton FullWidth FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary" Class="mb-2">Next</MudStaticButton>
                     </MudCardActions>
                 </MudCard>
         </EditForm>
+    </div>
+    <div style="@payView">
+        <MudCard style="height: 300px;width: 325px;">
+            <MudCardContent>
+                <MudTextField Mask="@(new PatternMask("0000 0000 0000 0000"))" Label="Credit Card Number" T="string" Variant="@Variant.Text" Clearable />
+                <MudTextField Mask="@(new DateMask("MM/YY", 'Y', 'M'))" Label="Expires" T="string" Variant="@Variant.Text" />
+                <MudTextField Mask="@(new PatternMask("000"))" Label="CVC" T="string" Variant="@Variant.Text" />
+                <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
+
+                </div>
+                <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText></div>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton FullWidth OnClick="Back" Variant="Variant.Filled" Color="Color.Secondary" Class="mr-2">Back</MudButton>
+                <MudButton FullWidth OnClick="Pay" Variant="Variant.Filled" Color="Color.Secondary" Class="ml-2">Pay</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </div>
+    <div style="@completedView">
+        <MudCard style="height: 300px;width: 325px;">
+            <MudCardContent>
+                <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">Your booking has been confirmed!</MudText></div>
+            </MudCardContent>
+        </MudCard>
+    </div>
 </div>
+
 <script>
     function initializeMap(lat, long) {
         var map = L.map('map', {
@@ -84,6 +112,9 @@
     private List<Vehicle> Vehicles = new List<Vehicle>();
     private decimal price = 0;
     private string username;
+    private string bookView = "display:block;";
+    private string payView = "display:none;";
+    private string completedView = "display:none;";
 
     [SupplyParameterFromForm]
     private BookingForm model { get; set; } = new();
@@ -113,6 +144,7 @@
                 : (DateTime?)null;
         }
     }
+
 
     protected override async Task OnInitializedAsync() {
         Carpark = await CarparkService.GetCarpark(carparkid);
@@ -164,14 +196,18 @@
         }
     }
 
-    private async Task Book()
+    private void Book()
     {
         // Validate Booking
         if (!ValidateBooking())
         {
             return;
         }
+        bookView = "display:none";
+        payView = "display:block";
+    }
 
+    private async Task Pay() {
         // Add Booking
         Booking temp = new Booking{
             UserId = await UserService.GetUserid(username),
@@ -182,10 +218,22 @@
             Cost = price,
             Status = Booking.Statuses.Active
         };
+        // Create New Booking Creates Payment as Well
         bool createsuccess = await BookingService.CreateNewBooking(temp);
         if (createsuccess) {
             Snackbar.Add("Booking successful!", Severity.Success);
+            bookView = "display:none";
+            payView = "display:none";
+            completedView = "display:block";
         }
+        else {
+            Snackbar.Add("There is an error with your booking", Severity.Success);
+        }
+    }
+
+    private void Back() {
+        bookView = "display:block";
+        payView = "display:none";
     }
 
     private bool ValidateBooking()

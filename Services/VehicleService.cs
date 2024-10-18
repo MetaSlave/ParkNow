@@ -10,17 +10,21 @@ public class VehicleService : IVehicleService
     // Get Database Context and Constructor to include context
     private readonly ILogger<VehicleService> _logger;
     private readonly AppDbContext _context;
+
     public VehicleService(AppDbContext context, ILogger<VehicleService> logger) {
         _context = context;
         _logger = logger;
     }
+
     public async Task<List<Vehicle>> GetUserVehicles(string username) {
         int userid = await _context.Users.Where(u => u.Username == username).Select(u => u.UserId).FirstOrDefaultAsync();
         return await _context.Vehicles.Where(v => v.UserId == userid).ToListAsync();
     }
+
     public async Task<Vehicle> GetVehicle(string licenseplate) {
         return await _context.Vehicles.Where(v => v.LicensePlate == licenseplate).FirstOrDefaultAsync();
     }
+
     public async Task<bool> CreateNewVehicle(Vehicle vehicle) {
        try {
             // Add vehicle
@@ -32,6 +36,7 @@ public class VehicleService : IVehicleService
             return false;
        }
     }
+
     public async Task<bool> EditExistingVehicle(Vehicle vehicle) {
        try {
             // Add vehicle

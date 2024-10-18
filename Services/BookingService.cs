@@ -21,8 +21,17 @@ public class BookingService : IBookingService
 
     public async Task<bool> CreateNewBooking(Booking booking) {
        try {
-            // Add vehicle
+            // Add Booking and Payment
             await _context.Bookings.AddAsync(booking);
+            await _context.SaveChangesAsync();
+            Payment temp_pay = new Payment{
+                UserId = booking.UserId,
+                BookingId = booking.BookingId,
+                Timestamp = DateTime.Now,
+                Amount = booking.Cost,
+                Status = Payment.Statuses.Success
+            };
+            await _context.Payments.AddAsync(temp_pay);
             await _context.SaveChangesAsync();
             return true;
        }
