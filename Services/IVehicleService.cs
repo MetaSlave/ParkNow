@@ -1,7 +1,10 @@
 using ParkNow.Models;
 
 namespace ParkNow.Services;
-
+/*
+This interface implements the methods of the Vehicle entity
+GetUserVehicles, GetVehicle, CreateNewVehicle, EditExistingVehicle
+*/
 public interface IVehicleService
 {
     Task<List<Vehicle>> GetUserVehicles(string username);

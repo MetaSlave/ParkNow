@@ -1,5 +1,10 @@
 using ParkNow.Models;
 namespace ParkNow.Services;
+/*
+This interface implements the methods of the User entity
+GetUser, HashPassword, VerifyPassword, VerifyCredentials, Register
+*/
+
 public interface IUserService
 {
     Task<User> GetUser (string username);
