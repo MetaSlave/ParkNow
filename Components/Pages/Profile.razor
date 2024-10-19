@@ -108,17 +108,16 @@
     private string profileView = "display:block;";   
     private string createVehicleView = "display:none;";
     private string editVehicleView = "display:none;";
-    private string username;
+    private string? username;
     
     [SupplyParameterFromForm]
     private NewVehicleForm model { get; set; } = new();
     public class NewVehicleForm
     {
-        public int UserId {get; set;}
         [Required]
-        public string LicensePlate { get; set; }
+        public string? LicensePlate { get; set; }
         [Required]
-        public string VehicleModel { get; set; }
+        public string? VehicleModel { get; set; }
         [Required]
         public Vehicle.CarTypes VehicleCarType { get; set; }
     }
@@ -129,11 +128,9 @@
     {
         public int VehicleId {get; set;}
         [Required]
-        public int UserId {get; set;}
+        public string? LicensePlate { get; set; }
         [Required]
-        public string LicensePlate { get; set; }
-        [Required]
-        public string VehicleModel { get; set; }
+        public string? VehicleModel { get; set; }
         [Required]
         public Vehicle.CarTypes VehicleCarType { get; set; }
     }
@@ -142,7 +139,15 @@
         var authState = await AuthenticationStateProvider
             .GetAuthenticationStateAsync();
         username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
-        User_Vehicles = await VehicleService.GetUserVehicles(username);
+        if (!string.IsNullOrEmpty(username))
+        {
+            User_Vehicles = await VehicleService.GetUserVehicles(username);
+        }
+        else
+        {
+            // Handle the case where the username is null or empty
+            User_Vehicles = new List<Vehicle>(); // or any other appropriate action
+        }
     }
     private void SwapCreateVehicleView()
     {  
@@ -163,16 +168,14 @@
         createVehicleView = "display:none;";
         Vehicle temp = await VehicleService.GetVehicle(vehicle.LicensePlate);
         model2.VehicleId = temp.VehicleId;
-        model2.UserId = temp.UserId;
         model2.LicensePlate = temp.LicensePlate;
         model2.VehicleModel = temp.Model;
         model2.VehicleCarType = temp.CarType;
         StateHasChanged();
     }
     private async void CreateNewVehicle() {
-        model.UserId = await UserService.GetUserid(username);
         Vehicle temp = new Vehicle{
-            UserId = model.UserId,
+            User = await UserService.GetUser(username),
             LicensePlate = model.LicensePlate,
             Model = model.VehicleModel,
             CarType = model.VehicleCarType
@@ -191,7 +194,7 @@
     private async void EditVehicle() {
         Vehicle temp = new Vehicle {
             VehicleId = model2.VehicleId,
-            UserId = model2.UserId,
+            User = await UserService.GetUser(username),
             LicensePlate = model2.LicensePlate,
             Model = model2.VehicleModel,
             CarType = model2.VehicleCarType

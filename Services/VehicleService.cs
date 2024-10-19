@@ -18,7 +18,7 @@ public class VehicleService : IVehicleService
 
     public async Task<List<Vehicle>> GetUserVehicles(string username) {
         int userid = await _context.Users.Where(u => u.Username == username).Select(u => u.UserId).FirstOrDefaultAsync();
-        return await _context.Vehicles.Where(v => v.UserId == userid).ToListAsync();
+        return await _context.Vehicles.Where(v => v.User.UserId == userid).ToListAsync();
     }
 
     public async Task<Vehicle> GetVehicle(string licenseplate) {

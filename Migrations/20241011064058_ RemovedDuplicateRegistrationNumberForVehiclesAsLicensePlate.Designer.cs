@@ -13,7 +13,7 @@ namespace ParkNow.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20241011064058_removed duplicate registraion number for vehicles as licenseplate alr = registration number")]
-    partial class removedduplicateregistraionnumberforvehiclesaslicenseplatealrregistrationnumber
+    partial class RemovedDuplicateRegistrationNumberForVehiclesAsLicensePlate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

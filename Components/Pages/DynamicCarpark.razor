@@ -105,13 +105,14 @@
         var marker = L.marker([lat,long]).addTo(map);
     }
 </script>
+
 @code {
     [Parameter]
     public string carparkid { get; set; }
     public Carpark Carpark = null;
     private List<Vehicle> Vehicles = new List<Vehicle>();
     private decimal price = 0;
-    private string username;
+    private string? username;
     private string bookView = "display:block;";
     private string payView = "display:none;";
     private string completedView = "display:none;";
@@ -122,6 +123,8 @@
     {
         [Required]
         public string? Carpark { get; set; }
+
+        [Required]
         public string? Vehicle { get; set; }
         public DateTime? StartDate { get; set; }
 
@@ -151,10 +154,18 @@
         var authState = await AuthenticationStateProvider
             .GetAuthenticationStateAsync();
         username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
-        Vehicles = await VehicleService.GetUserVehicles(username);
-        model.StartDate = DateTime.Now;
-        model.StartTime = DateTime.Now.TimeOfDay;
-        model.Carpark = carparkid;
+        if (!string.IsNullOrEmpty(username))
+        {
+            Vehicles = await VehicleService.GetUserVehicles(username);
+            model.StartDate = DateTime.Now;
+            model.StartTime = DateTime.Now.TimeOfDay;
+            model.Carpark = carparkid;
+        }
+        else
+        {
+            // Handle the case where the username is null or empty
+            Vehicles = new List<Vehicle>();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -210,8 +221,9 @@
     private async Task Pay() {
         // Add Booking
         Booking temp = new Booking{
-            UserId = await UserService.GetUserid(username),
-            CarparkId = carparkid,
+            User = await UserService.GetUser(username),
+            Carpark = await CarparkService.GetCarpark(carparkid),
+            Vehicle = await VehicleService.GetVehicle(model.Vehicle),
             StartTime = model.GetStartDateTime(),
             EndTime = model.GetEndDateTime(),
             BookingTime = DateTime.Now,

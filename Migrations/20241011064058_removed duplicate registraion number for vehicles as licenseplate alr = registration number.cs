@@ -5,7 +5,7 @@
 namespace ParkNow.Migrations
 {
     /// <inheritdoc />
-    public partial class removedduplicateregistraionnumberforvehiclesaslicenseplatealrregistrationnumber : Migration
+    public partial class RemovedDuplicateRegistrationNumberForVehiclesAsLicensePlate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

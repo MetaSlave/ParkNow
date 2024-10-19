@@ -1,6 +1,15 @@
+/*
+This class implements the Carpark entity using information from the gov dataset:
+https://data.gov.sg/datasets/d_23f946fa557947f93a8043bbef41dd09/view
+with the attributes
+CarparkId, Address, XCord, YCord, Type, SystemType,
+ShortTermParkingType, FreeParking, NightParking, 
+CentralCharge, GantryHeight, CarparkBasement
+The following additional attributes are updated via a Background Service using
+information from the gov api:
+https://api.data.gov.sg/v1/transport/carpark-availability 
+*/
 namespace ParkNow.Models;
-
-// https://data.gov.sg/datasets/d_23f946fa557947f93a8043bbef41dd09/view
 public class Carpark {
     public required string CarparkId {get; set;}
     public required string Address {get; set;}

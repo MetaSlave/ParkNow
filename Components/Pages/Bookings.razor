@@ -1,9 +1,59 @@
 ﻿@page "/bookings"
-@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Authorization
+@inject IBookingService BookingService
+@inject IDialogService DialogService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @attribute [Authorize]
 
 <PageTitle>My Bookings</PageTitle>
+<AuthorizeView>
+    <Authorized> 
+        <MudPaper Height="500px" Width="100%">
+            <MudContainer Fixed="true">
+                <div class="d-flex flex-row align-center justify-center pt-4 pb-4">
+                    <MudText class="mr-2"Typo="Typo.h6">Your Bookings</MudText>
+                    <MudSpacer/>
+                </div>
+                <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                    <RowTemplate Context="col">
+                        <div class="d-flex flex-row align-center justify-left gap-4 pt-4 pb-4">
+                            <MudIcon class="ml-4" Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
+                            <MudText Style="">@col.BookingTime.ToString("hh:mm tt dd MMMM yyyy")</MudText>
+                            <MudSpacer></MudSpacer>
+                            <MudText class="mr-4">@col.Status</MudText>
+                            <MudButton  class="mr-4" @onclick="OpenBookingInfoAsync" EndIcon="@Icons.Material.Filled.Edit" IconSize="Size.Small">View</MudButton>
+                        </div>
+                    </RowTemplate>
+                </MudTable>
+            </MudContainer>
+        </MudPaper>
+    </Authorized> 
+</AuthorizeView>
 
 
 @code {
+    private IEnumerable<Booking> User_Bookings = new List<Booking>();
+    private string? username;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+        username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
+        if (!string.IsNullOrEmpty(username))
+        {
+            User_Bookings = await BookingService.GetUserBookings(username);
+        }
+        else
+        {
+            User_Bookings = new List<Booking>();
+        }
+    }
+
+    private Task OpenBookingInfoAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        return DialogService.ShowAsync<BookingDialog>("Simple Dialog", options);
+    }
 }

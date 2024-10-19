@@ -1,6 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+/*
+This class implements the Booking entity with the attributes
+BookingId, PaymentId, UserId, VehicleId, CarparkId,
+StartTime, EndTime, BookingTime, Cost, Status
+*/
+using System.ComponentModel.DataAnnotations.Schema;
 namespace ParkNow.Models;
-
 public class Booking {
     public enum Statuses
     {
@@ -9,10 +13,18 @@ public class Booking {
         Cancelled
     }
     public int BookingId {get; set;}
-    public int PaymentId {get; set;}
-    public int UserId {get; set;}
-    public required string CarparkId {get; set;}
 
+    [ForeignKey("PaymentId")]
+    public Payment? Payment {get; set;}
+
+    [ForeignKey("UserId")]
+    public required User User {get; set;}
+
+    [ForeignKey("VehicleId")]
+    public required Vehicle Vehicle {get; set;}
+
+    [ForeignKey("CarparkId")]
+    public required Carpark Carpark {get; set;}
     public required DateTime? StartTime {get; set;}
     public required DateTime? EndTime {get; set;}
     public required DateTime BookingTime {get; set;}
