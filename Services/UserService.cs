@@ -23,25 +23,6 @@ public class UserService : IUserService
         return CryptographicOperations.FixedTimeEquals(hashToCompare, Convert.FromHexString(hash));
     }
 
-   public async Task<bool> ChangePassword(string username, string oldPassword, string newPassword) {
-        if (await VerifyCredentials(username, oldPassword)) {
-            try {
-                // Add User
-                User? db_user = await _context.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
-                if (db_user == null) {
-                    return false;
-                }
-                db_user.Password = HashPassword(newPassword);
-                await _context.SaveChangesAsync();
-            }
-            catch {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
-
     public string HashPassword(string password) {
         var byte_salt = Encoding.UTF8.GetBytes("35cdd9db5a7eb3bf27ecb65e351dd6d4088f82bbdedcc800ca2a44e4b34df82e946972ab434762f87cd56fe09e7e8b2d83c33f101874d7f1e66303c510256525");
         var hashBytes = Rfc2898DeriveBytes.Pbkdf2(password, byte_salt, 350000, HashAlgorithmName.SHA512, 64);
@@ -70,5 +51,30 @@ public class UserService : IUserService
         return true;
     }
 
+   public async Task<bool> ChangePassword(string username, string oldPassword, string newPassword) {
+        if (await VerifyCredentials(username, oldPassword)) {
+            try {
+                // Add User
+                User? db_user = await _context.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
+                if (db_user == null) {
+                    return false;
+                }
+                db_user.Password = HashPassword(newPassword);
+                await _context.SaveChangesAsync();
+            }
+            catch {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public async Task<bool> ChangeEmail(string username, string email) {
+        User db_user = await GetUser(username);
+        db_user.Email = email;
+        await _context.SaveChangesAsync();
+        return true;
+    }
 
 }

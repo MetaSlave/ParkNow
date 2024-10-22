@@ -184,7 +184,7 @@
         if (success) {
             SwapVehicleView();
             User_Vehicles = await VehicleService.GetUserVehicles(username);
-            Snackbar.Add("Vehicle successfully created", Severity.Info);
+            Snackbar.Add("Vehicle successfully created", Severity.Success);
             StateHasChanged();
         }
         else {
@@ -203,7 +203,7 @@
         if (success) {
             SwapVehicleView();
             User_Vehicles = await VehicleService.GetUserVehicles(username);
-            Snackbar.Add("Vehicle successfully edited", Severity.Info);
+            Snackbar.Add("Vehicle successfully edited", Severity.Success);
             StateHasChanged();
         }
         else {
