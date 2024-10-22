@@ -75,31 +75,27 @@ git clone https://github.com/MetaSlave/ParkNow
 }
 ```
 
-## 7. once done, save, run the following in cmd
+### 7. once done, save, run the following in cmd
 ```
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=123456a@" -p 1433:1433 --name sa -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-## 8. once done, go to your cli in the main parknow dir, and run 
+### 8. once done, go to your cli in the main parknow dir, and run 
 ```
 dotnet run
 ```
 
-## 9. Visit "http://localhost:5121/" and make sure the site is up
+### 9. Visit "http://localhost:5121/" and make sure the site is up
 
-## 10. Download the csv and py file below, and add them to the main dir
-
-## 11. Run
+### 11. Run
 ```
 pip install pyodbc
 ```
 
-## 12. Install ODBC Driver 18 for SQL Server online
+### 12. Install ODBC Driver 18 for SQL Server online
 https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
 
-## 12. Run the following command in the main dir
+### 12. Run the following command in the main dir
 ```
 python populateCarpark.py
 ```
-
-## 13. Go over to Program.cs file, and uncomment line 59
