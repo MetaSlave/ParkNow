@@ -56,7 +56,7 @@ builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 
 // Hosted Background Services
-//builder.Services.AddHostedService<CarparkUpdater>();
+builder.Services.AddHostedService<CarparkUpdater>();
 
 builder.Services.AddMudServices(config =>
 {
