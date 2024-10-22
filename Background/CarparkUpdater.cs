@@ -5,6 +5,7 @@ using ParkNow.Models;
 
 namespace ParkNow.Background;
 
+// Updates Carpark Lot Status
 public class CarparkUpdater : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -24,11 +25,11 @@ public class CarparkUpdater : BackgroundService
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 await UpdateAvailability(context);
                 // Every 5 min call
-                await Task.Delay(600000, stoppingToken);
+                await Task.Delay(300000, stoppingToken);
             }
         }
     }
-    public async Task UpdateAvailability(AppDbContext context) {
+    private async Task UpdateAvailability(AppDbContext context) {
         var client = new HttpClient();
         var request = new HttpRequestMessage
         {

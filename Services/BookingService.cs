@@ -15,17 +15,17 @@ public class BookingService : IBookingService
     }
 
     public async Task<List<Booking>> GetUserBookings(string username) {
-        int userid = await _context.Users.Where(u => u.Username == username).Select(u => u.UserId).FirstOrDefaultAsync();
-        return await _context.Bookings.Where(v => v.User.UserId == userid).ToListAsync();
+        return await _context.Bookings
+        .Include(b => b.Vehicle)
+        .Include(b => b.Carpark)
+        .Where(v => v.User.Username == username).ToListAsync();
     }
 
     public async Task<bool> CreateNewBooking(Booking booking) {
        try {
             // Add Booking and Payment
             await _context.Bookings.AddAsync(booking);
-            _logger.LogInformation("Passed Booking");
             await _context.SaveChangesAsync();
-            _logger.LogInformation("Passed Booking");
             Payment temp_pay = new Payment{
                 Booking = booking,
                 Timestamp = DateTime.Now,
@@ -33,7 +33,6 @@ public class BookingService : IBookingService
                 Status = Payment.Statuses.Success
             };
             await _context.Payments.AddAsync(temp_pay);
-            _logger.LogInformation("Passed Payment");
             await _context.SaveChangesAsync();
             return true;
        }

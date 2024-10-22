@@ -17,13 +17,32 @@
                 <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
                     <RowTemplate Context="col">
                         <div class="d-flex flex-row align-center justify-left gap-4 pt-4 pb-4">
-                            <MudIcon class="ml-4" Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
+                            <MudIconButton class="ml-4" Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleExpand(col))" Size="Size.Medium"/>
+                            <MudIcon class="ml-2" Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
                             <MudText Style="">@col.BookingTime.ToString("hh:mm tt dd MMMM yyyy")</MudText>
                             <MudSpacer></MudSpacer>
-                            <MudText class="mr-4">@col.Status</MudText>
-                            <MudButton  class="mr-4" @onclick="OpenBookingInfoAsync" EndIcon="@Icons.Material.Filled.Edit" IconSize="Size.Small">View</MudButton>
+                            <MudChip class="ml-6" Color="@(GetStatusColor(col.Status))" T="string" Size="Size.Medium">@col.Status</MudChip>
+                            <MudButton class="mr-4" @onclick="OpenBookingInfoAsync" EndIcon="@Icons.Material.Filled.Edit" IconSize="Size.Small">View</MudButton>
                         </div>
                     </RowTemplate>
+                    <ChildRowContent Context="col">
+                        @if (expandedRows.Contains(col)) {
+                            <MudTr>
+                                <MudCard Elevation="0">
+                                    <MudCardContent>
+                                        <div class="d-flex flex-column gap-4">
+                                            <MudText><strong>Carpark Address:</strong> @col.Carpark.CarparkId</MudText>
+                                            <MudText><strong>Carpark Address:</strong> @col.Carpark.Address</MudText>
+                                            <MudText><strong>Vehicle:</strong> @col.Vehicle.LicensePlate</MudText>
+                                            <MudText><strong>Start Time:</strong> @col.StartTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
+                                            <MudText><strong>End Time:</strong> @col.EndTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
+                                            <MudText><strong>Cost:</strong> $@col.Cost.ToString("F2")</MudText>
+                                        </div>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudTr>
+                        }
+                    </ChildRowContent>
                 </MudTable>
             </MudContainer>
         </MudPaper>
@@ -33,6 +52,7 @@
 
 @code {
     private IEnumerable<Booking> User_Bookings = new List<Booking>();
+    private HashSet<Booking> expandedRows = new HashSet<Booking>();
     private string? username;
 
     protected override async Task OnInitializedAsync()
@@ -55,5 +75,23 @@
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
         return DialogService.ShowAsync<BookingDialog>("Simple Dialog", options);
+    }
+
+    private void ToggleExpand(Booking booking)
+    {
+        if (expandedRows.Contains(booking))
+            expandedRows.Remove(booking);
+        else
+            expandedRows.Add(booking);
+    }
+    private Color GetStatusColor(Booking.Statuses status)
+    {
+        return status switch
+        {
+            Booking.Statuses.Active => Color.Success,
+            Booking.Statuses.Completed => Color.Info,
+            Booking.Statuses.Cancelled => Color.Error,
+            _ => Color.Default
+        };
     }
 }
