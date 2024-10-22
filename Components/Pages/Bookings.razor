@@ -14,36 +14,60 @@
                     <MudText class="mr-2"Typo="Typo.h6">Your Bookings</MudText>
                     <MudSpacer/>
                 </div>
-                <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
-                    <RowTemplate Context="col">
-                        <div class="d-flex flex-row align-center justify-left gap-4 pt-4 pb-4">
-                            <MudIconButton class="ml-4" Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleExpand(col))" Size="Size.Medium"/>
-                            <MudIcon class="ml-2" Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
-                            <MudText Style="">@col.BookingTime.ToString("hh:mm tt dd MMMM yyyy")</MudText>
-                            <MudSpacer></MudSpacer>
-                            <MudChip class="ml-6" Color="@(GetStatusColor(col.Status))" T="string" Size="Size.Medium">@col.Status</MudChip>
-                            <MudButton class="mr-4" @onclick="OpenBookingInfoAsync" EndIcon="@Icons.Material.Filled.Edit" IconSize="Size.Small">View</MudButton>
-                        </div>
-                    </RowTemplate>
-                    <ChildRowContent Context="col">
-                        @if (expandedRows.Contains(col)) {
-                            <MudTr>
-                                <MudCard Elevation="0">
-                                    <MudCardContent>
-                                        <div class="d-flex flex-column gap-4">
-                                            <MudText><strong>Carpark Address:</strong> @col.Carpark.CarparkId</MudText>
-                                            <MudText><strong>Carpark Address:</strong> @col.Carpark.Address</MudText>
-                                            <MudText><strong>Vehicle:</strong> @col.Vehicle.LicensePlate</MudText>
-                                            <MudText><strong>Start Time:</strong> @col.StartTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
-                                            <MudText><strong>End Time:</strong> @col.EndTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
-                                            <MudText><strong>Cost:</strong> $@col.Cost.ToString("F2")</MudText>
-                                        </div>
-                                    </MudCardContent>
-                                </MudCard>
-                            </MudTr>
-                        }
-                    </ChildRowContent>
-                </MudTable>
+                <div style="height: 400px; overflow: auto;">
+                    <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" Virtualize="true" LoadingProgressColor="Color.Info" Class="overflow-auto">
+                        <RowTemplate Context="col">
+                            <div class="d-flex flex-row align-center justify-left gap-2 pt-4 pb-4">
+                                <MudIconButton class="ml-2" Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleExpand(col))" Size="Size.Medium"/>
+                                <MudIcon class="mr-4" Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
+                                <MudText Style="">@col.BookingTime.ToString("hh:mm tt dd MMMM yyyy")</MudText>
+                                <MudSpacer></MudSpacer>
+                                <div class="d-flex flex-column flex-sm-row align-center gap-2 mr-6">
+                                    <MudChip T="string" Color="@(GetStatusColor(col.Status))" Size="Size.Medium">@col.Status</MudChip>
+                                    <MudButton @onclick="OpenBookingInfoAsync" 
+                                            EndIcon="@Icons.Material.Filled.Edit" 
+                                            IconSize="Size.Small">Edit</MudButton>
+                                </div>
+                            </div>
+                        </RowTemplate>
+                        <ChildRowContent Context="col">
+                            @if (expandedRows.Contains(col)) {
+                                <MudTr>
+                                    <MudCard Elevation="0">
+                                        <MudCardContent Style="max-height: 200px; overflow-y: auto;">
+                                            <div class="d-flex flex-column gap-4">
+                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Carpark ID:</MudText>
+                                                    <MudText Style="flex: 1;">@col.Carpark.CarparkId</MudText>
+                                                </div>
+                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Carpark Address:</MudText>
+                                                    <MudText Style="flex: 1;">@col.Carpark.Address</MudText>
+                                                </div>
+                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Vehicle:</MudText>
+                                                    <MudText Style="flex: 1;">@col.Vehicle.LicensePlate</MudText>
+                                                </div>
+                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Start Time:</MudText>
+                                                    <MudText Style="flex: 1;">@col.StartTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
+                                                </div>
+                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">End Time:</MudText>
+                                                    <MudText Style="flex: 1;">@col.EndTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
+                                                </div>
+                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Cost:</MudText>
+                                                    <MudText Style="flex: 1;">$@col.Cost.ToString("F2")</MudText>
+                                                </div>
+                                            </div>
+                                        </MudCardContent>
+                                    </MudCard>
+                                </MudTr>
+                            }
+                        </ChildRowContent>
+                    </MudTable>
+                </div>
             </MudContainer>
         </MudPaper>
     </Authorized> 
