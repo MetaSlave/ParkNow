@@ -87,7 +87,7 @@ dotnet run
 
 ### 9. Visit "http://localhost:5121/" and make sure the site is up
 
-### 11. Run
+### 11. Run the following command to install the pyodbc module (optional)
 ```
 pip install pyodbc
 ```
