@@ -75,12 +75,12 @@ git clone https://github.com/MetaSlave/ParkNow
 }
 ```
 
-### 7. once done, save, run the following in cmd
+### 7. Run the following in cmd
 ```
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=123456a@" -p 1433:1433 --name sa -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-### 8. once done, go to your cli in the main parknow dir, and run 
+### 8. Go to your cli in the main parknow dir, and run 
 ```
 dotnet run
 ```
