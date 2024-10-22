@@ -3,6 +3,7 @@ This class implements the Vehicle entity with the attributes
 VehicleId, UserId, LicensePlate, Model, CarType
 */
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace ParkNow.Models;
 public class Vehicle {
@@ -17,6 +18,7 @@ public class Vehicle {
     public int VehicleId {get; set;}
     
     [ForeignKey("UserId")]
+    [DeleteBehavior(DeleteBehavior.NoAction)]
     public required User User {get; set;}
     public required string LicensePlate {get; set;}
     public string? Model {get; set;}

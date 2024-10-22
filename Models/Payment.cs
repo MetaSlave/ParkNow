@@ -19,8 +19,6 @@ public class Payment {
     [ForeignKey("BookingId")]
     public required Booking Booking {get; set;}
 
-    [ForeignKey("UserId")]
-    public required User User {get; set;}
     [Precision(18, 2)]
     public required decimal Amount {get; set;}
 

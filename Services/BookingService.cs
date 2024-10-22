@@ -27,7 +27,6 @@ public class BookingService : IBookingService
             await _context.SaveChangesAsync();
             _logger.LogInformation("Passed Booking");
             Payment temp_pay = new Payment{
-                User = booking.User,
                 Booking = booking,
                 Timestamp = DateTime.Now,
                 Amount = booking.Cost,

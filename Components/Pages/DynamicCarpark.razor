@@ -72,9 +72,6 @@
                 <MudTextField Mask="@(new PatternMask("0000 0000 0000 0000"))" Label="Credit Card Number" T="string" Variant="@Variant.Text" Clearable />
                 <MudTextField Mask="@(new DateMask("MM/YY", 'Y', 'M'))" Label="Expires" T="string" Variant="@Variant.Text" />
                 <MudTextField Mask="@(new PatternMask("000"))" Label="CVC" T="string" Variant="@Variant.Text" />
-                <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
-
-                </div>
                 <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText></div>
             </MudCardContent>
             <MudCardActions>
@@ -183,19 +180,19 @@
 
     private async Task UpdateStartDate(DateTime? date) {
         model.StartDate = date;
-        UpdatePrice();
+        await UpdatePrice();
     }
     private async Task UpdateEndDate(DateTime? date) {
         model.EndDate = date;
-        UpdatePrice();
+        await UpdatePrice();
     }
     private async Task UpdateStartTime(TimeSpan? time) {
         model.StartTime = time;
-        UpdatePrice();
+        await UpdatePrice();
     }
     private async Task UpdateEndTime(TimeSpan? time) {
         model.EndTime = time;
-        UpdatePrice();
+        await UpdatePrice();
     }
 
     private async Task UpdatePrice() {
