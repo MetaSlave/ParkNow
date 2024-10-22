@@ -62,7 +62,7 @@ namespace ParkNow.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Bookings");
+                    b.ToTable("Bookings", (string)null);
                 });
 
             modelBuilder.Entity("ParkNow.Models.Carpark", b =>
@@ -118,7 +118,7 @@ namespace ParkNow.Migrations
 
                     b.HasKey("CarparkId");
 
-                    b.ToTable("Carparks");
+                    b.ToTable("Carparks", (string)null);
                 });
 
             modelBuilder.Entity("ParkNow.Models.Payment", b =>
@@ -152,7 +152,7 @@ namespace ParkNow.Migrations
 
                     b.HasKey("PaymentId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("ParkNow.Models.User", b =>
@@ -177,7 +177,7 @@ namespace ParkNow.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("ParkNow.Models.Vehicle", b =>
@@ -205,7 +205,7 @@ namespace ParkNow.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("ParkNow.Models.Booking", b =>

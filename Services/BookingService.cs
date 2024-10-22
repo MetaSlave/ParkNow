@@ -23,7 +23,9 @@ public class BookingService : IBookingService
        try {
             // Add Booking and Payment
             await _context.Bookings.AddAsync(booking);
+            _logger.LogInformation("Passed Booking");
             await _context.SaveChangesAsync();
+            _logger.LogInformation("Passed Booking");
             Payment temp_pay = new Payment{
                 User = booking.User,
                 Booking = booking,
@@ -32,10 +34,13 @@ public class BookingService : IBookingService
                 Status = Payment.Statuses.Success
             };
             await _context.Payments.AddAsync(temp_pay);
+            _logger.LogInformation("Passed Payment");
             await _context.SaveChangesAsync();
             return true;
        }
-       catch {
+       catch (Exception e){
+            _logger.LogInformation(e.Message);
+            _logger.LogInformation(e.InnerException.Message);
             return false;
        }
     }

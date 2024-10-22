@@ -4,6 +4,7 @@ BookingId, PaymentId, UserId, VehicleId, CarparkId,
 StartTime, EndTime, BookingTime, Cost, Status
 */
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 namespace ParkNow.Models;
 public class Booking {
     public enum Statuses
@@ -28,6 +29,8 @@ public class Booking {
     public required DateTime? StartTime {get; set;}
     public required DateTime? EndTime {get; set;}
     public required DateTime BookingTime {get; set;}
+    
+    [Precision(18, 2)]
     public required decimal Cost {get; set;}
     public required Statuses Status {get; set;}
 }

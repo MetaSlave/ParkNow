@@ -4,6 +4,7 @@ PaymentId, BookingId, UserId, Amount, VoucherId, Discount,
 Timestamp, Status
 */
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 namespace ParkNow.Models;
 public class Payment {
     public enum Statuses
@@ -20,10 +21,12 @@ public class Payment {
 
     [ForeignKey("UserId")]
     public required User User {get; set;}
+    [Precision(18, 2)]
     public required decimal Amount {get; set;}
 
     [ForeignKey("VoucherId")]
     public Voucher? Voucher {get; set;}
+    [Precision(18, 2)]
     public decimal? Discount {get; set;}
     public required DateTime Timestamp {get; set;}
     public required Statuses Status {get; set;}

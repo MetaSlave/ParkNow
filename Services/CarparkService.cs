@@ -18,7 +18,10 @@ public class CarparkService : ICarparkService
     }
 
     public async Task<Carpark> GetCarpark(string carparkid) {
+        return await _context.Carparks.Where(c => c.CarparkId == carparkid).FirstOrDefaultAsync();
+        /*
         Carpark? fetched = await _context.Carparks.Where(c => c.CarparkId == carparkid).FirstOrDefaultAsync();
+
         if (fetched == null) {
             return null;
         }
@@ -36,5 +39,6 @@ public class CarparkService : ICarparkService
             GantryHeight = fetched.GantryHeight,
             CarparkBasement = fetched.CarparkBasement,
         };
+        */
     }
 }

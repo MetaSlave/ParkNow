@@ -27,7 +27,7 @@
 <div class="mt-8 d-flex justify-center align-center flex-column flex-grow-1 gap-4">
     <MudText class="mr-2"Typo="Typo.h6">
         @if (Carpark != null) {
-            @("Carpark: " + Carpark.CarparkId)
+            @("Carpark: " + carparkid)
         }
     </MudText>
     <MudText class="mr-2"Typo="Typo.h6">
@@ -108,7 +108,7 @@
 
 @code {
     [Parameter]
-    public string carparkid { get; set; }
+    public required string carparkid { get; set; }
     public Carpark Carpark = null;
     private List<Vehicle> Vehicles = new List<Vehicle>();
     private decimal price = 0;
@@ -151,6 +151,7 @@
 
     protected override async Task OnInitializedAsync() {
         Carpark = await CarparkService.GetCarpark(carparkid);
+
         var authState = await AuthenticationStateProvider
             .GetAuthenticationStateAsync();
         username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
@@ -222,7 +223,7 @@
         // Add Booking
         Booking temp = new Booking{
             User = await UserService.GetUser(username),
-            Carpark = await CarparkService.GetCarpark(carparkid),
+            Carpark = Carpark,
             Vehicle = await VehicleService.GetVehicle(model.Vehicle),
             StartTime = model.GetStartDateTime(),
             EndTime = model.GetEndDateTime(),
@@ -230,6 +231,7 @@
             Cost = price,
             Status = Booking.Statuses.Active
         };
+        Logger.LogInformation("Passed Booking");
         // Create New Booking Creates Payment as Well
         bool createsuccess = await BookingService.CreateNewBooking(temp);
         if (createsuccess) {
@@ -239,7 +241,7 @@
             completedView = "display:block";
         }
         else {
-            Snackbar.Add("There is an error with your booking", Severity.Success);
+            Snackbar.Add("There is an error with your booking", Severity.Error);
         }
     }
 

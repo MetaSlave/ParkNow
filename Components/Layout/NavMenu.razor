@@ -1,9 +1,10 @@
 ﻿<MudNavMenu>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
     <MudNavLink Href="route" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Route">Route Me!</MudNavLink>
-    <MudNavLink Href="bookings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">My Bookings</MudNavLink>
     <AuthorizeView>
         <Authorized>
+            <MudNavLink Href="bookings" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">My Bookings</MudNavLink>
+            <MudNavLink Href="vehicles" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.DirectionsCarFilled">My Vehicles</MudNavLink>
             <MudNavLink Href="profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">My Profile</MudNavLink>
         </Authorized>
     </AuthorizeView>

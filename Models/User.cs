@@ -1,7 +1,8 @@
-using System;
-
+/*
+This class implements the User entity with the attributes
+UserId, Password, Username, Email
+*/
 namespace ParkNow.Models;
-
 public class User
 {
     public int UserId {get; set;}
