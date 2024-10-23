@@ -4,6 +4,20 @@
 
 ParkNow is a web application designed to streamline parking management for vehicle owners in Singapore. It simplifies the process of locating, booking, and paying for parking spaces, helping to reduce the time and fuel wasted in searching for parking spots. With features like real-time parking availability, reservations, and navigation assistance, ParkNow aims to improve urban mobility and reduce congestion.
 
+## Technology Stack
+
+- ASP.Net Core Blazor (Front End and Back End)
+
+- MudBlazor (Component Library)
+
+- Leaflet (For Maps)
+
+- MSSql (For Database Storage)
+
+- Docker (For Easier Deployment)
+
+- Nginx (Reverse Proxy to proxy requests to Blazor)
+
 ## Features
 
 - **User Account Management**: 
