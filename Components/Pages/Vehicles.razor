@@ -184,7 +184,7 @@
             CarType = model.VehicleCarType,
             Deleted = false,
         };
-        bool success = await VehicleService.CreateNewVehicle(temp);
+        bool success = await VehicleService.CreateVehicle(temp);
         if (success) {
             SwapVehicleView();
             User_Vehicles = await VehicleService.GetUserVehicles(username);
@@ -204,7 +204,7 @@
             CarType = model2.VehicleCarType,
             Deleted = false,
         };
-        bool success = await VehicleService.EditExistingVehicle(temp);
+        bool success = await VehicleService.UpdateVehicle(temp);
         if (success) {
             SwapVehicleView();
             User_Vehicles = await VehicleService.GetUserVehicles(username);
@@ -212,12 +212,12 @@
             StateHasChanged();
         }
         else {
-            Snackbar.Add("Error creating vehicle", Severity.Error);
+            Snackbar.Add("Error editing vehicle", Severity.Error);
         }
     }
 
     private async void DeleteVehicle() {
-        bool success = await VehicleService.DeleteExistingVehicle(model2.VehicleId);
+        bool success = await VehicleService.DeleteVehicle(model2.VehicleId);
         if (success) {
             SwapVehicleView();
             User_Vehicles = await VehicleService.GetUserVehicles(username);

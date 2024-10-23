@@ -17,5 +17,6 @@ public class AppDbContext : DbContext
     public DbSet<Carpark> Carparks {get; set;}
     public DbSet<Payment> Payments {get; set;}
     public DbSet<Vehicle> Vehicles {get; set;}
+    public DbSet<Voucher> Vouchers {get; set;}
 
 }

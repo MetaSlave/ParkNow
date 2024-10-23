@@ -20,8 +20,11 @@ public class BookingService : IBookingService
         .Include(b => b.Carpark)
         .Where(v => v.User.Username == username).ToListAsync();
     }
+    public async Task<Booking> GetBooking(int BookingId) {
+        return await _context.Bookings.Where(b => b.BookingId == BookingId).FirstOrDefaultAsync();
+    }
 
-    public async Task<bool> CreateNewBooking(Booking booking) {
+    public async Task<bool> CreateBooking(Booking booking) {
        try {
             // Add Booking and Payment
             await _context.Bookings.AddAsync(booking);
@@ -41,6 +44,37 @@ public class BookingService : IBookingService
             _logger.LogInformation(e.InnerException.Message);
             return false;
        }
+    }
+    public async Task<bool> UpdateBooking(Booking booking) {
+       try {
+            // Add Booking
+            Booking? db_Booking = await _context.Bookings.Where(b => b.BookingId == booking.BookingId).FirstOrDefaultAsync();
+            if (db_Booking == null) {
+                return false;
+            }
+            db_Booking.StartTime = booking.StartTime;
+            db_Booking.EndTime= booking.EndTime;
+            await _context.SaveChangesAsync();
+       }
+       catch {
+            return false;
+       }
+        return true;
+    }
+    public async Task<bool> DeleteBooking(int BookingId) {
+        try {
+            // Delete Booking
+            Booking? db_Booking = await _context.Bookings.Where(b => b.BookingId == BookingId).FirstOrDefaultAsync();
+            if (db_Booking == null) {
+                return false;
+            }
+            _context.Remove(db_Booking);
+            await _context.SaveChangesAsync();
+       }
+       catch {
+            return false;
+       }
+        return true;
     }
 
     public async Task<Decimal>? CalculatePrice(DateTime start, DateTime end, Carpark carpark) {

@@ -33,8 +33,13 @@ public class BookingUpdater : BackgroundService
         // Only get Non Cancelled Bookings
         List<Booking> all_bookings = await context.Bookings.Where(b => b.Status != Booking.Statuses.Cancelled).ToListAsync();
         foreach (Booking book in all_bookings) {
-            if (book.EndTime <= DateTime.Now) {
+            // Completed
+            if (DateTime.Now > book.EndTime) {
                 book.Status = Booking.Statuses.Completed;
+            }
+            // Active
+            else if (DateTime.Now > book.StartTime){
+                book.Status = Booking.Statuses.Active;
             }
         }
         await context.SaveChangesAsync();

@@ -17,14 +17,14 @@ public class VehicleService : IVehicleService
     }
 
     public async Task<List<Vehicle>> GetUserVehicles(string username) {
-        return await _context.Vehicles.Where(v => v.User.Username == username).ToListAsync();
+        return await _context.Vehicles.Where(v => v.User.Username == username && v.Deleted != true).ToListAsync();
     }
 
     public async Task<Vehicle> GetVehicle(string licenseplate) {
         return await _context.Vehicles.Where(v => v.LicensePlate == licenseplate).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> CreateNewVehicle(Vehicle vehicle) {
+    public async Task<bool> CreateVehicle(Vehicle vehicle) {
        try {
             // Add vehicle
             await _context.Vehicles.AddAsync(vehicle);
@@ -36,16 +36,16 @@ public class VehicleService : IVehicleService
        }
     }
 
-    public async Task<bool> EditExistingVehicle(Vehicle vehicle) {
+    public async Task<bool> UpdateVehicle(Vehicle vehicle) {
        try {
             // Add vehicle
-            Vehicle? db_vehicle = await _context.Vehicles.Where(v => v.VehicleId == vehicle.VehicleId).FirstOrDefaultAsync();
-            if (db_vehicle == null) {
+            Vehicle? db_Vehicle = await _context.Vehicles.Where(v => v.VehicleId == vehicle.VehicleId).FirstOrDefaultAsync();
+            if (db_Vehicle == null) {
                 return false;
             }
-            db_vehicle.LicensePlate = vehicle.LicensePlate;
-            db_vehicle.Model = vehicle.Model;
-            db_vehicle.CarType = vehicle.CarType;
+            db_Vehicle.LicensePlate = vehicle.LicensePlate;
+            db_Vehicle.Model = vehicle.Model;
+            db_Vehicle.CarType = vehicle.CarType;
             await _context.SaveChangesAsync();
        }
        catch {
@@ -54,14 +54,13 @@ public class VehicleService : IVehicleService
         return true;
     }
 
-    public async Task<bool> DeleteExistingVehicle(int VehicleId) {
+    public async Task<bool> DeleteVehicle(int VehicleId) {
         try {
-            // Add vehicle
-            Vehicle? db_vehicle = await _context.Vehicles.Where(v => v.VehicleId == VehicleId).FirstOrDefaultAsync();
-            if (db_vehicle == null) {
+            Vehicle? db_Vehicle = await _context.Vehicles.Where(v => v.VehicleId == VehicleId).FirstOrDefaultAsync();
+            if (db_Vehicle == null) {
                 return false;
             }
-            db_vehicle.Deleted = true;
+            db_Vehicle.Deleted = true;
             await _context.SaveChangesAsync();
        }
        catch {

@@ -226,11 +226,10 @@
             EndTime = model.GetEndDateTime(),
             BookingTime = DateTime.Now,
             Cost = price,
-            Status = Booking.Statuses.Active
+            Status = Booking.Statuses.Scheduled
         };
-        Logger.LogInformation("Passed Booking");
         // Create New Booking Creates Payment as Well
-        bool createsuccess = await BookingService.CreateNewBooking(temp);
+        bool createsuccess = await BookingService.CreateBooking(temp);
         if (createsuccess) {
             Snackbar.Add("Booking successful!", Severity.Success);
             bookView = "display:none";

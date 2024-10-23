@@ -11,7 +11,8 @@ public class Booking {
     {
         Active,
         Completed,
-        Cancelled
+        Cancelled,
+        Scheduled,
     }
     public int BookingId {get; set;}
 
