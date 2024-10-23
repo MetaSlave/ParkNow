@@ -17,8 +17,7 @@ public class VehicleService : IVehicleService
     }
 
     public async Task<List<Vehicle>> GetUserVehicles(string username) {
-        int userid = await _context.Users.Where(u => u.Username == username).Select(u => u.UserId).FirstOrDefaultAsync();
-        return await _context.Vehicles.Where(v => v.User.UserId == userid).ToListAsync();
+        return await _context.Vehicles.Where(v => v.User.Username == username).ToListAsync();
     }
 
     public async Task<Vehicle> GetVehicle(string licenseplate) {
@@ -47,6 +46,22 @@ public class VehicleService : IVehicleService
             db_vehicle.LicensePlate = vehicle.LicensePlate;
             db_vehicle.Model = vehicle.Model;
             db_vehicle.CarType = vehicle.CarType;
+            await _context.SaveChangesAsync();
+       }
+       catch {
+            return false;
+       }
+        return true;
+    }
+
+    public async Task<bool> DeleteExistingVehicle(int VehicleId) {
+        try {
+            // Add vehicle
+            Vehicle? db_vehicle = await _context.Vehicles.Where(v => v.VehicleId == VehicleId).FirstOrDefaultAsync();
+            if (db_vehicle == null) {
+                return false;
+            }
+            db_vehicle.Deleted = true;
             await _context.SaveChangesAsync();
        }
        catch {

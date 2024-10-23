@@ -93,7 +93,10 @@
                                     }
                                 </MudSelect>
                             </MudPaper>
-                            <MudStaticButton FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary">Submit</MudStaticButton>
+                            <div class="d-flex flex-row align-center justify-center gap-4 pt-4">
+                                <MudStaticButton FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary">Submit</MudStaticButton>
+                                <MudButton OnClick="DeleteVehicle" Variant="Variant.Filled" Color="Color.Error">Delete</MudButton>
+                            </div>
                         </div>
                     </ChildContent>
                     </EditForm>
@@ -178,7 +181,8 @@
             User = await UserService.GetUser(username),
             LicensePlate = model.LicensePlate,
             Model = model.VehicleModel,
-            CarType = model.VehicleCarType
+            CarType = model.VehicleCarType,
+            Deleted = false,
         };
         bool success = await VehicleService.CreateNewVehicle(temp);
         if (success) {
@@ -197,7 +201,8 @@
             User = await UserService.GetUser(username),
             LicensePlate = model2.LicensePlate,
             Model = model2.VehicleModel,
-            CarType = model2.VehicleCarType
+            CarType = model2.VehicleCarType,
+            Deleted = false,
         };
         bool success = await VehicleService.EditExistingVehicle(temp);
         if (success) {
@@ -208,6 +213,19 @@
         }
         else {
             Snackbar.Add("Error creating vehicle", Severity.Error);
+        }
+    }
+
+    private async void DeleteVehicle() {
+        bool success = await VehicleService.DeleteExistingVehicle(model2.VehicleId);
+        if (success) {
+            SwapVehicleView();
+            User_Vehicles = await VehicleService.GetUserVehicles(username);
+            Snackbar.Add("Vehicle successfully deleted", Severity.Success);
+            StateHasChanged();
+        }
+        else {
+            Snackbar.Add("Error deleting vehicle", Severity.Error);
         }
     }
 }

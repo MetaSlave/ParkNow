@@ -20,6 +20,7 @@ public class Vehicle {
     [ForeignKey("UserId")]
     [DeleteBehavior(DeleteBehavior.NoAction)]
     public required User User {get; set;}
+    public required bool Deleted {get; set;}
     public required string LicensePlate {get; set;}
     public string? Model {get; set;}
     public required CarTypes CarType {get; set;}

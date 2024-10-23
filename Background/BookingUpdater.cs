@@ -37,6 +37,7 @@ public class BookingUpdater : BackgroundService
                 book.Status = Booking.Statuses.Completed;
             }
         }
+        await context.SaveChangesAsync();
     }
 }
 
