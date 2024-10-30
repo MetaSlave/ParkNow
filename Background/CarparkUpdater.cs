@@ -23,7 +23,15 @@ public class CarparkUpdater : BackgroundService
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                await UpdateAvailability(context);
+                try
+                {
+                    await UpdateAvailability(context);
+                }
+                catch (System.Exception ex)
+                {
+                    
+                    _logger.LogInformation(ex.Message);
+                }
                 // Every 5 min call
                 await Task.Delay(300000, stoppingToken);
             }

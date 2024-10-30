@@ -1,77 +1,286 @@
 ﻿@page "/route"
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 @inject IJSRuntime JSRuntime
+@inject ICarparkService CarparkService
 @inject ILogger<Route> Logger
-
-<link rel="stylesheet" href="js/leaflet/leaflet.css" />
-<script src="js/leaflet/leaflet.js"></script>
-<link rel="stylesheet" href="js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.css" />
-<script src="js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.js"></script>
 
 <PageTitle>Navigate</PageTitle>
 
-<div id="map" style="height: 80vh;width: 100%;"> </div>
-
-<script>
-function initializeMap(dotNetHelper) {
-    var map = L.map('map', {
-        center: [1.3686323149474335,103.84452368184051],
-        zoom: 17
-    });
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    L.Routing.control({
-        waypoints: [
-            L.latLng(1.3779868065283465,103.84260221150643),
-            L.latLng(1.3670348671904478,103.83818076351676)
-        ],
-        routeWhileDragging: true
-    })
-    .on('routesfound', function(e) {
-        var routes = e.routes;
-        var simplifiedRoutes = routes.map(function(route) {
-            return {
-                summary: route.summary,
-                coordinates: route.coordinates.map(function(coord) {
-                    return [coord.lat, coord.lng];
-                }),
-                instructions: route.instructions.map(function(instruction) {
-                    return {
-                        type: instruction.type,
-                        text: instruction.text,
-                        distance: instruction.distance,
-                        time: instruction.time,
-                    };
-                }),
-            };
-        });
-        var routesJson = JSON.stringify(simplifiedRoutes);
-        dotNetHelper.invokeMethodAsync('ReceiveRoutes', routesJson);
-    })
-    .addTo(map);
-}
-</script>
+<div class="d-flex justify-center flex-column flex-sm-row flex-grow-1 gap-2" style="height: 90vh;">
+    <div id="map" style="height: 100%;width: 100%;"></div>
+    <MudPaper Height="100%" Elevation="1" style="overflow-y: scroll;">
+        <div class="d-flex justify-center align-center flex-column gap-2">
+            <MudAutocomplete T="Carpark" 
+                class="ml-4 mr-4 mt-4"
+                Variant="Variant.Outlined"
+                Label="To"
+                @bind-Value="To"
+                SearchFunc="@((value, token) => SearchCarparks(value))"
+                ToStringFunc="@(c => c?.CarparkId ?? "")"
+                Clearable="true"/>
+            
+            @if (userLocation.Instructions.Any())
+            {
+                <MudList T="RouteInstruction" Dense="true" Class="mx-4">
+                    <MudListItem Class="mt-4">
+                        <MudText Typo="Typo.h6">Total: @FormatDistance(userLocation.TotalDistance) • @FormatTime(userLocation.TotalTime)</MudText>
+                    </MudListItem>
+                    @foreach (var instruction in userLocation.Instructions)
+                    {
+                        <MudListItem>
+                            <div class="d-flex flex-column">
+                                <MudText>@instruction.Text</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @FormatDistance(instruction.Distance) • @FormatTime(instruction.Time)
+                                </MudText>
+                            </div>
+                        </MudListItem>
+                        <MudDivider Class="my-2"/>
+                    }
+                </MudList>
+            }
+        </div>
+    </MudPaper>
+</div>
 
 @code {
     private DotNetObjectReference<Route>? dotNetHelper;
+    private IEnumerable<Carpark> Carparks = new List<Carpark>();
+    private Carpark To;
+    private LocationResult userLocation = new LocationResult{Latitude = "1.3686323149474335", Longitude = "103.84452368184051"};
+    public class LocationResult
+    {
+        public required string Latitude { get; set; }
+        public required string Longitude { get; set; }
+        public IEnumerable<RouteInstruction> Instructions = new List<RouteInstruction>();
+        public double TotalDistance {get; set; }
 
+        public double TotalTime {get; set; }
+    }
+    public class RouteInstruction
+    {
+        public string Text { get; set; } = String.Empty;
+        public double Distance { get; set; }
+        public double Time { get; set; }
+    }
+
+    private async Task GetUserLocation()
+    {
+        try
+        {
+            var location = await JSRuntime.InvokeAsync<LocationResult>("getCurrentLocation");
+            if (location != null)
+            {
+                userLocation.Latitude = location.Latitude;
+                userLocation.Longitude = location.Longitude;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle errors (e.g., user denied permission)
+            Console.WriteLine($"Error getting location: {ex.Message}");
+        }
+    }
+    private string FormatDistance(double distance)
+    {
+        if (distance >= 1000)
+        {
+            return $"{(distance / 1000):F1} km";
+        }
+        return $"{(int)distance} m";
+    }
+
+    private string FormatTime(double seconds)
+    {
+        var timeSpan = TimeSpan.FromSeconds(seconds);
+        if (timeSpan.TotalHours >= 1)
+        {
+            return $"{(int)timeSpan.TotalHours}h {timeSpan.Minutes}min";
+        }
+        if (timeSpan.Minutes > 0)
+        {
+            return $"{timeSpan.Minutes}min";
+        }
+        return $"{timeSpan.Seconds}s";
+    }
+
+    private async Task<IEnumerable<Carpark>> SearchCarparks(string value)
+    {
+        // Return all items when search string is empty
+        if (string.IsNullOrEmpty(value)) {
+            return await Task.FromResult(Carparks);
+        }
+        return Carparks.Where(x => x.CarparkId?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false);
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             dotNetHelper = DotNetObjectReference.Create(this);
+            Carparks = await CarparkService.GetAllCarparks();
+            await LoadScriptsAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadScriptsAsync()
+    {
+        try
+        {
+            // Load CSS files
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                if (!document.getElementById('leaflet-css')) {
+                    var link = document.createElement('link');
+                    link.id = 'leaflet-css';
+                    link.rel = 'stylesheet';
+                    link.href = 'js/leaflet/leaflet.css';
+                    document.head.appendChild(link);
+                }
+                if (!document.getElementById('routing-css')) {
+                    var link = document.createElement('link');
+                    link.id = 'routing-css';
+                    link.rel = 'stylesheet';
+                    link.href = 'js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.css';
+                    document.head.appendChild(link);
+                }
+            ");
+
+            // Load JavaScript files sequentially
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                function loadScript(url) {
+                    return new Promise((resolve, reject) => {
+                        if (document.querySelector(`script[src='${url}']`)) {
+                            resolve();
+                            return;
+                        }
+                        const script = document.createElement('script');
+                        script.src = url;
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.body.appendChild(script);
+                    });
+                }
+            ");
+
+            // Load Leaflet first, then Routing Machine
+            await JSRuntime.InvokeVoidAsync("loadScript", "js/leaflet/leaflet.js");
+            await JSRuntime.InvokeVoidAsync("loadScript", "js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.js");
+            await JSRuntime.InvokeVoidAsync("loadScript", "js/location.js");
+
+            // Get location
+            await GetUserLocation();
+
+            // Initialize map after scripts are loaded
+            await InitializeMapAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"Error loading scripts: {ex.Message}");
+        }
+    }
+
+    private async Task InitializeMapAsync()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                window.initializeMap = function(dotNetHelper) {
+                    if (typeof L === 'undefined') {
+                        console.error('Leaflet is not loaded');
+                        return;
+                    }
+
+                    // Check if map instance already exists
+                    if (window.mapInstance) {
+                        window.mapInstance.remove();
+                    }
+
+                    var map = L.map('map', {
+                        center: [" + userLocation.Latitude + "," + userLocation.Longitude + @"],
+                        zoom: 17
+                    });
+                    window.mapInstance = map;
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    L.Routing.control({
+                        waypoints: [
+                            L.latLng(" + userLocation.Latitude + "," + userLocation.Longitude + @"),
+                            L.latLng(1.3670348671904478,103.83818076351676)
+                        ],
+                        routeWhileDragging: true,
+                        show: false,  // Don't show the routing control
+                        addWaypoints: false,  // Disable adding new waypoints
+                        draggableWaypoints: false  // Disable dragging waypoints
+                    })
+                    .on('routesfound', function(e) {
+                        var routes = e.routes;
+                        var simplifiedRoutes = routes.map(function(route) {
+                            return {
+                                summary: route.summary,
+                                coordinates: route.coordinates.map(function(coord) {
+                                    return [coord.lat, coord.lng];
+                                }),
+                                instructions: route.instructions.map(function(instruction) {
+                                    return {
+                                        type: instruction.type,
+                                        text: instruction.text,
+                                        distance: instruction.distance,
+                                        time: instruction.time,
+                                    };
+                                }),
+                            };
+                        });
+                        var routesJson = JSON.stringify(simplifiedRoutes);
+                        dotNetHelper.invokeMethodAsync('ReceiveRoutes', routesJson);
+                    })
+                    .addTo(map);
+                }
+            ");
+
             await JSRuntime.InvokeVoidAsync("initializeMap", dotNetHelper);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"Error initializing map: {ex.Message}");
         }
     }
 
     [JSInvokable]
     public void ReceiveRoutes(string routesData)
     {
-        Logger.LogInformation(routesData);
+        JsonDocument routeDetails = JsonDocument.Parse(routesData);
+        try
+        {
+            var route = routeDetails.RootElement[0];
+            userLocation.Instructions = route.GetProperty("instructions")
+                .EnumerateArray()
+                .Select(instruction => new RouteInstruction
+                {
+                    Text = instruction.GetProperty("text").GetString() ?? "",
+                    Distance = instruction.GetProperty("distance").GetDouble(),
+                    Time = instruction.GetProperty("time").GetDouble()
+                })
+                .ToList();
+            userLocation.TotalDistance = route.GetProperty("summary")
+                .GetProperty("totalDistance")
+                .GetDouble();
+            userLocation.TotalTime = route.GetProperty("summary")
+                .GetProperty("totalTime")
+                .GetDouble();
+            Logger.LogInformation(userLocation.TotalDistance.ToString());
+            Logger.LogInformation(userLocation.TotalTime.ToString());
+        }
+        catch
+        {
+            Logger.LogInformation("Error Receiving Route Data");
+        }
+        StateHasChanged();
     }
 
     public void Dispose()
