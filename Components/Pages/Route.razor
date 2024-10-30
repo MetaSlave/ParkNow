@@ -17,7 +17,8 @@
                 class="ml-4 mr-4 mt-4"
                 Variant="Variant.Outlined"
                 Label="To"
-                @bind-Value="To"
+                Value="To"
+                ValueChanged="@UpdateTo"
                 SearchFunc="@((value, token) => SearchCarparks(value))"
                 ToStringFunc="@(c => c?.CarparkId ?? "")"
                 Clearable="true"/>
@@ -115,6 +116,29 @@
         }
         return Carparks.Where(x => x.CarparkId?.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false);
     }
+
+    private async Task UpdateTo(Carpark carpark) {
+        if (carpark != null)
+        {
+            To = carpark;
+            // Update the map route
+           try 
+            {
+                // Use the updateRoute function which will trigger routesfound
+                await JSRuntime.InvokeVoidAsync(
+                    "mapFunctions.updateRoute",
+                    userLocation.Latitude,
+                    userLocation.Longitude,
+                    carpark.XCord,
+                    carpark.YCord
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error updating route: {ex.Message}");
+            }
+        }
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -187,63 +211,79 @@
         try
         {
             await JSRuntime.InvokeVoidAsync("eval", @"
-                window.initializeMap = function(dotNetHelper) {
-                    if (typeof L === 'undefined') {
-                        console.error('Leaflet is not loaded');
-                        return;
-                    }
+                window.mapFunctions = {
+                    initializeMap: function(dotNetHelper) {
+                        if (typeof L === 'undefined') {
+                            console.error('Leaflet is not loaded');
+                            return;
+                        }
 
-                    // Check if map instance already exists
-                    if (window.mapInstance) {
-                        window.mapInstance.remove();
-                    }
+                        // Check if map instance already exists
+                        if (window.mapInstance) {
+                            window.mapInstance.remove();
+                        }
 
-                    var map = L.map('map', {
-                        center: [" + userLocation.Latitude + "," + userLocation.Longitude + @"],
-                        zoom: 17
-                    });
-                    window.mapInstance = map;
-
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-
-                    L.Routing.control({
-                        waypoints: [
-                            L.latLng(" + userLocation.Latitude + "," + userLocation.Longitude + @"),
-                            L.latLng(1.3670348671904478,103.83818076351676)
-                        ],
-                        routeWhileDragging: true,
-                        show: false,  // Don't show the routing control
-                        addWaypoints: false,  // Disable adding new waypoints
-                        draggableWaypoints: false  // Disable dragging waypoints
-                    })
-                    .on('routesfound', function(e) {
-                        var routes = e.routes;
-                        var simplifiedRoutes = routes.map(function(route) {
-                            return {
-                                summary: route.summary,
-                                coordinates: route.coordinates.map(function(coord) {
-                                    return [coord.lat, coord.lng];
-                                }),
-                                instructions: route.instructions.map(function(instruction) {
-                                    return {
-                                        type: instruction.type,
-                                        text: instruction.text,
-                                        distance: instruction.distance,
-                                        time: instruction.time,
-                                    };
-                                }),
-                            };
+                        var map = L.map('map', {
+                            center: [" + userLocation.Latitude + "," + userLocation.Longitude + @"],
+                            zoom: 17
                         });
-                        var routesJson = JSON.stringify(simplifiedRoutes);
-                        dotNetHelper.invokeMethodAsync('ReceiveRoutes', routesJson);
-                    })
-                    .addTo(map);
-                }
+                        window.mapInstance = map;
+
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors'
+                        }).addTo(map);
+
+                        var routingControl = L.Routing.control({
+                            waypoints: [
+                                L.latLng(" + userLocation.Latitude + "," + userLocation.Longitude + @"),
+                                L.latLng(1.3670348671904478,103.83818076351676)
+                            ],
+                            routeWhileDragging: true,
+                            show: false,
+                            addWaypoints: false,
+                            draggableWaypoints: false
+                        })
+                        .on('routesfound', function(e) {
+                            var routes = e.routes;
+                            var simplifiedRoutes = routes.map(function(route) {
+                                return {
+                                    summary: route.summary,
+                                    coordinates: route.coordinates.map(function(coord) {
+                                        return [coord.lat, coord.lng];
+                                    }),
+                                    instructions: route.instructions.map(function(instruction) {
+                                        return {
+                                            type: instruction.type,
+                                            text: instruction.text,
+                                            distance: instruction.distance,
+                                            time: instruction.time,
+                                        };
+                                    }),
+                                };
+                            });
+                            var routesJson = JSON.stringify(simplifiedRoutes);
+                            dotNetHelper.invokeMethodAsync('ReceiveRoutes', routesJson);
+                        })
+                        .addTo(map);
+
+                        window.mapInstance.routing = routingControl;
+                    },
+                    
+                    updateRoute: function(fromLat, fromLng, toLat, toLng) {
+                        if (window.mapInstance && window.mapInstance.routing) {
+                            var waypoints = [
+                                L.latLng(fromLat, fromLng),
+                                L.latLng(toLat, toLng)
+                            ];
+                            window.mapInstance.routing.setWaypoints(waypoints);
+                        } else {
+                            console.error('Map or routing control not initialized');
+                        }
+                    }
+                };
             ");
 
-            await JSRuntime.InvokeVoidAsync("initializeMap", dotNetHelper);
+            await JSRuntime.InvokeVoidAsync("mapFunctions.initializeMap", dotNetHelper);
         }
         catch (Exception ex)
         {
