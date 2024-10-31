@@ -31,6 +31,9 @@ public class UserService : IUserService
 
     public async Task<bool> VerifyCredentials(string username, string password) {
         var user = await _context.Users.Where(e => e.Username == username).SingleOrDefaultAsync();
+        if (user == null) {
+            return false;
+        }
         bool valid = VerifyPassword(password, user.Password, "35cdd9db5a7eb3bf27ecb65e351dd6d4088f82bbdedcc800ca2a44e4b34df82e946972ab434762f87cd56fe09e7e8b2d83c33f101874d7f1e66303c510256525");
         if (user == null || !valid) {
             return false;

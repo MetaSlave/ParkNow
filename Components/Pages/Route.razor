@@ -313,8 +313,6 @@
             userLocation.TotalTime = route.GetProperty("summary")
                 .GetProperty("totalTime")
                 .GetDouble();
-            Logger.LogInformation(userLocation.TotalDistance.ToString());
-            Logger.LogInformation(userLocation.TotalTime.ToString());
         }
         catch
         {

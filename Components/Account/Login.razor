@@ -20,6 +20,10 @@
                                 @bind-Value="model.Username" For="@(() => model.Username)"/>
                     <MudStaticTextField Label="Password" HelperText="Enter your password" Class="mt-3"
                                 @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password"/>
+                    @if (showLoginError)
+                    {
+                        <MudText Color="Color.Error" Class="mt-1">Invalid username or password</MudText>
+                    }
                 </MudCardContent>
                 <MudCardActions>
                     <MudStaticButton FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudStaticButton>
@@ -33,6 +37,7 @@
 @code {
     [CascadingParameter]
     public HttpContext? HttpContext{get; set;}
+    private bool showLoginError = false;
     
     [SupplyParameterFromForm]
     private LoginAccountForm model { get; set; } = new();
@@ -57,7 +62,9 @@
             Navigate.NavigateTo("/");
         }
         else {
-            // Popup error
+            // Login error
+            showLoginError = true;
+            StateHasChanged();
         }
     }
 }

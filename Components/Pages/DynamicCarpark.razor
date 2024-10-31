@@ -72,7 +72,14 @@
                 <MudTextField Mask="@(new PatternMask("0000 0000 0000 0000"))" Label="Credit Card Number" T="string" Variant="@Variant.Text" Clearable />
                 <MudTextField Mask="@(new DateMask("MM/YY", 'Y', 'M'))" Label="Expires" T="string" Variant="@Variant.Text" />
                 <MudTextField Mask="@(new PatternMask("000"))" Label="CVC" T="string" Variant="@Variant.Text" />
-                <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText></div>
+                <div>
+                    @if (price <= 0M) {
+                        <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">Parking Unavailable</MudText>
+                    }
+                    else {
+                        <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText>
+                    }
+                </div>
             </MudCardContent>
             <MudCardActions>
                 <MudButton FullWidth OnClick="Back" Variant="Variant.Filled" Color="Color.Secondary" Class="mr-2">Back</MudButton>
@@ -274,6 +281,10 @@
         else if (endDateTime.Value <= startDateTime.Value)
         {
             errors.Add("End date and time must be after the start date and time");
+        }
+
+        if (price <= 0) {
+            errors.Add("Booking is unavailable for this time period");
         }
 
         if (errors.Any())
