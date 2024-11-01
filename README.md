@@ -1,4 +1,4 @@
-![parknowlogo](images/parknow.png)
+![parknowlogo](images/parknow_logo.png)
 
 # Welcome to ParkNow ! 
 
