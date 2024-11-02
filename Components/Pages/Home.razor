@@ -6,8 +6,13 @@
 
 <AuthorizeView>
     <NotAuthorized>
-        <div style="display: flex; flex-direction: column; justify-content: center; margin: 20px;">
-            <MudText Typo="Typo.h2" style="margin-top:3%; margin-bottom: 10px;"Align="Align.Center">Welcome to Parknow!</MudText>
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+            <MudText Typo="Typo.h2" style="margin-top:3%;"Align="Align.Center">Welcome to</MudText>
+                <MudImage Src="/images/parknow_logo.png" 
+                    Alt="Parknow Logo"
+                    Elevation="0" 
+                    Class="rounded-lg align-self-center"
+                    Style="max-width: min(600px, 80%); height: auto;"/>
             <MudText Typo="Typo.body1" Align="Align.Center" >Your ultimate parking solution</MudText>
         </div>
     </NotAuthorized>

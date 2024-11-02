@@ -6,7 +6,6 @@ public class TestNightParkingExtract
 	{
 		public DateTime Start { get; set; }
 		public DateTime End { get; set; }
-
 		public override string ToString() => $"{Start:yyyy-MM-dd HH:mm} to {End:yyyy-MM-dd HH:mm}";
 	}
 

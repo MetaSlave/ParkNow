@@ -200,6 +200,12 @@
             model.StartDate = DateTime.Now;
             model.StartTime = DateTime.Now.TimeOfDay;
             model.Carpark = carparkid;
+
+            // Prevent Double Booking of Vehicle
+            List<Booking> User_Bookings = await BookingService.GetUserBookings(username);
+            foreach (Booking book in User_Bookings.Where(b => b.Status != Booking.Statuses.Completed)) {
+                Vehicles.Remove(book.Vehicle);
+            }
         }
         else
         {
