@@ -16,10 +16,22 @@ public class BookingService : IBookingService
     }
 
     public async Task<List<Booking>> GetUserBookings(string username) {
-        return await _context.Bookings
+        List<Booking> User_Bookings = await _context.Bookings
         .Include(b => b.Vehicle)
         .Include(b => b.Carpark)
         .Where(v => v.User.Username == username).ToListAsync();
+        foreach (Booking book in User_Bookings) {
+            // Completed
+            if (DateTime.Now > book.EndTime) {
+                book.Status = Booking.Statuses.Completed;
+            }
+            // Active
+            else if (DateTime.Now > book.StartTime){
+                book.Status = Booking.Statuses.Active;
+            }
+        }
+        await _context.SaveChangesAsync();
+        return User_Bookings;
     }
     public async Task<Booking> GetBooking(int BookingId) {
         return await _context.Bookings.Where(b => b.BookingId == BookingId).FirstOrDefaultAsync();
@@ -55,6 +67,8 @@ public class BookingService : IBookingService
             }
             db_Booking.StartTime = booking.StartTime;
             db_Booking.EndTime= booking.EndTime;
+            db_Booking.Cost = booking.Cost;
+            db_Booking.Status = booking.Status;
             await _context.SaveChangesAsync();
        }
        catch {
@@ -78,7 +92,13 @@ public class BookingService : IBookingService
         return true;
     }
 
-    // Price Calculations
+    // Price Calculation
+    public class TimeSlot
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+    }
+
     public async Task<Decimal>? CalculatePrice(DateTime start, DateTime end, Carpark carpark) {
         List<TimeSlot> paid_slots = new List<TimeSlot>();
 
@@ -194,14 +214,8 @@ public class BookingService : IBookingService
                 TotalPrice += price;
             }
         }
-        return TotalPrice;
+        return decimal.Round(TotalPrice, 2);;
     }
-    public class TimeSlot
-    {
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-    }
-
     public static List<TimeSlot> RemoveFreeTimeSlots(DateTime start, DateTime end, TimeSpan freeStartTime, TimeSpan freeEndTime)
     {
         var result = new List<TimeSlot>();

@@ -37,7 +37,7 @@
     </MudText>
     <div id="map" style="height: 325px;width: 325px;"> </div>
     <div style="@bookView">
-        <EditForm FormName="book" Model="@model" OnValidSubmit="Book">
+        <EditForm FormName="book" Model="@model" OnSubmit="Book">
             <DataAnnotationsValidator/>
                 <MudCard style="height: 300px;width: 325px;">
                     <MudCardContent>
@@ -58,6 +58,7 @@
                             <MudDatePicker Color="Color.Secondary" Date="@model.StartDate" DateChanged="@(date => UpdateStartDate(date))"/>
                             <MudDatePicker Color="Color.Secondary" Date="@model.EndDate" DateChanged="@(date => UpdateEndDate(date))"/>
                         </div>
+                        <MudSpacer/>
                         <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText></div>
                     </MudCardContent>
                     <MudCardActions>
@@ -67,25 +68,50 @@
         </EditForm>
     </div>
     <div style="@payView">
-        <MudCard style="height: 300px;width: 325px;">
-            <MudCardContent>
-                <MudTextField Mask="@(new PatternMask("0000 0000 0000 0000"))" Label="Credit Card Number" T="string" Variant="@Variant.Text" Clearable />
-                <MudTextField Mask="@(new DateMask("MM/YY", 'Y', 'M'))" Label="Expires" T="string" Variant="@Variant.Text" />
-                <MudTextField Mask="@(new PatternMask("000"))" Label="CVC" T="string" Variant="@Variant.Text" />
-                <div>
-                    @if (price <= 0M) {
-                        <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">Parking Unavailable</MudText>
-                    }
-                    else {
-                        <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText>
-                    }
-                </div>
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton FullWidth OnClick="Back" Variant="Variant.Filled" Color="Color.Secondary" Class="mr-2">Back</MudButton>
-                <MudButton FullWidth OnClick="Pay" Variant="Variant.Filled" Color="Color.Secondary" Class="ml-2">Pay</MudButton>
-            </MudCardActions>
-        </MudCard>
+        <EditForm FormName="book" Model="@model2" OnSubmit="Pay">
+            <DataAnnotationsValidator/>
+            <MudCard style="height: 300px;width: 325px;">
+                <MudCardContent>
+                    <MudTextField @bind-Value="model2.CreditCardNumber"
+                        Mask="@(new PatternMask("0000 0000 0000 0000"))" 
+                        Label="Credit Card Number" 
+                        T="string" 
+                        Variant="@Variant.Text" Clearable />
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="model2.Expiry"
+                                Mask="@(new DateMask("MM/YY", 'Y', 'M'))" 
+                                Label="Expiry" 
+                                T="string" 
+                                Variant="@Variant.Text" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="model2.CSV"
+                                Mask="@(new PatternMask("000"))" 
+                                Label="CVC" 
+                                T="string" 
+                                Variant="@Variant.Text" />
+                        </MudItem>
+                    </MudGrid>
+                    <MudTextField @bind-Value="model2.VoucherId"
+                        Label="Voucher" 
+                        T="string" />
+                    <MudSpacer/>
+                    <div>
+                        @if (price <= 0M) {
+                            <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">Parking Unavailable</MudText>
+                        }
+                        else {
+                            <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText>
+                        }
+                    </div>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton FullWidth OnClick="Back" Variant="Variant.Filled" Color="Color.Secondary" Class="mr-2">Back</MudButton>
+                    <MudStaticButton FullWidth FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary" Class="ml-2">Pay</MudStaticButton>
+                </MudCardActions>
+            </MudCard>
+        </EditForm>
     </div>
     <div style="@completedView">
         <MudCard style="height: 300px;width: 325px;">
@@ -127,7 +153,6 @@
     {
         [Required]
         public string? Carpark { get; set; }
-
         [Required]
         public string? Vehicle { get; set; }
         public DateTime? StartDate { get; set; }
@@ -152,7 +177,17 @@
         }
     }
 
-
+    [SupplyParameterFromForm]
+    private PaymentForm model2 {get; set;} = new();
+    public class PaymentForm {
+        [Required]
+        public string? CreditCardNumber {get; set;} = string.Empty;
+        [Required]
+        public string? CSV {get; set;} = string.Empty;
+        [Required]
+        public string? Expiry {get; set;} = string.Empty;
+        public string? VoucherId {get; set;}
+    }
     protected override async Task OnInitializedAsync() {
         Carpark = await CarparkService.GetCarpark(carparkid);
 
@@ -224,6 +259,12 @@
     }
 
     private async Task Pay() {
+        // Validate Payment
+        if (!ValidatePayment())
+        {
+            return;
+        }
+
         // Add Booking
         Booking temp = new Booking{
             User = await UserService.GetUser(username),
@@ -257,7 +298,7 @@
     {
         var errors = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(model.Vehicle))
+        if (model.Vehicle == null || string.IsNullOrWhiteSpace(model.Vehicle))
         {
             errors.Add("Vehicle is required");
         }
@@ -285,6 +326,34 @@
 
         if (price <= 0) {
             errors.Add("Booking is unavailable for this time period");
+        }
+
+        if (errors.Any())
+        {
+            foreach (var error in errors)
+            {
+                Snackbar.Add(error, Severity.Error);
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool ValidatePayment() {
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(model2.CreditCardNumber))
+        {
+            errors.Add("Credit Card Number is required");
+        }
+        if (string.IsNullOrWhiteSpace(model2.CSV))
+        {
+            errors.Add("CSV is required");
+        }
+        if (string.IsNullOrWhiteSpace(model2.Expiry))
+        {
+            errors.Add("Credit Card Expiry is required");
         }
 
         if (errors.Any())

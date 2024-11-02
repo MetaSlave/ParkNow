@@ -225,7 +225,7 @@
 
                         var map = L.map('map', {
                             center: [" + userLocation.Latitude + "," + userLocation.Longitude + @"],
-                            zoom: 17
+                            zoom: 15
                         });
                         window.mapInstance = map;
 
@@ -235,8 +235,7 @@
 
                         var routingControl = L.Routing.control({
                             waypoints: [
-                                L.latLng(" + userLocation.Latitude + "," + userLocation.Longitude + @"),
-                                L.latLng(1.3670348671904478,103.83818076351676)
+                                L.latLng(" + userLocation.Latitude + "," + userLocation.Longitude + @")
                             ],
                             routeWhileDragging: true,
                             show: false,

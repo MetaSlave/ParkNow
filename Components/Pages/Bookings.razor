@@ -27,7 +27,7 @@
                                 <div class="d-flex flex-column flex-sm-row align-end justify-center gap-2 mr-6">
                                     <MudChip T="string" Color="@(GetStatusColor(col.Status))" Size="Size.Medium">@col.Status</MudChip>
                                     @if (col.Status == Booking.Statuses.Active) {
-                                        <MudButton OnClick="@(() => OpenBookingInfoAsync())" EndIcon="@Icons.Material.Filled.StopCircle" IconSize="Size.Small">End</MudButton>
+                                        <MudButton OnClick="@(() => OpenBookingInfoAsync(col))" EndIcon="@Icons.Material.Filled.StopCircle" IconSize="Size.Small">End</MudButton>
                                     }
                                     else if (col.Status != Booking.Statuses.Completed) {
                                         <MudButton OnClick="@(() => EditBookingView(col))" EndIcon="@Icons.Material.Filled.Edit" IconSize="Size.Small">Edit</MudButton>
@@ -152,7 +152,7 @@
         username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
         if (!string.IsNullOrEmpty(username))
         {
-            User_Bookings = await BookingService.GetUserBookings(username);
+            User_Bookings = await BookingService.GetUserBookings(username);   
             User_Bookings = User_Bookings.OrderBy(b => 
             b.Status switch
             {
@@ -182,11 +182,6 @@
             Snackbar.Add("Booking has already completed", Severity.Error);
             return;
         }
-        /*
-        else if (booking.Status == Booking.Statuses.Active) {
-            // Add new view for end now
-            return;
-        }*/
         bookingView = "display:none;";
         editBookingView = "display:block;";
         model.StartDate = booking.StartTime?.Date;
@@ -245,6 +240,11 @@
         else if (endDateTime.Value <= startDateTime.Value)
         {
             errors.Add("End date and time must be after the start date and time");
+        }
+
+        var price = await BookingService.CalculatePrice(model.GetStartDateTime() ?? DateTime.Now,model.GetEndDateTime() ?? DateTime.Now,model.Booking.Carpark);
+        if (price <= 0) {
+            errors.Add("Booking is unavailable for this time period");
         }
 
         if (errors.Any())
@@ -310,11 +310,46 @@
         }
     }
 
-    private Task OpenBookingInfoAsync()
+    private async Task OpenBookingInfoAsync(Booking booking)
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
 
-        return DialogService.ShowAsync<BookingDialog>("Simple Dialog", options);
+        var dialog = await DialogService.ShowAsync<BookingDialog>("End Booking Dialog", options);
+        var result = await dialog.Result;
+        if (!result.Canceled && result.Data is bool data && data)
+        {
+            // Change Booking
+            Booking temp = new Booking {
+                BookingId = booking.BookingId,
+                Vehicle = booking.Vehicle,
+                Carpark = booking.Carpark,
+                User = booking.User,
+                StartTime = booking.StartTime,
+                EndTime = DateTime.Now,
+                BookingTime = booking.BookingTime,
+                Cost = await BookingService.CalculatePrice(booking.StartTime ?? DateTime.Now, DateTime.Now, booking.Carpark),
+                Status = Booking.Statuses.Completed,
+            };
+            bool success = await BookingService.UpdateBooking(temp);
+            if (success) {
+                SwapBookingView();
+                User_Bookings = await BookingService.GetUserBookings(username);
+                User_Bookings = User_Bookings.OrderBy(b => 
+                b.Status switch
+                {
+                    Booking.Statuses.Active => 0,
+                    Booking.Statuses.Scheduled => 1,
+                    Booking.Statuses.Completed => 2,
+                    Booking.Statuses.Cancelled => 3,
+                    _ => 4
+                }).ToList();
+                Snackbar.Add("Booking successfully edited", Severity.Success);
+                StateHasChanged();
+            }
+            else {
+                Snackbar.Add("Error editing Booking", Severity.Error);
+            }
+        }
     }
 
     private void ToggleExpand(Booking booking)

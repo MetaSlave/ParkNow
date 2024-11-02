@@ -12,7 +12,7 @@
         </div>
     </NotAuthorized>
     <Authorized> 
-        <div class="mt-8 d-flex justify-center align-center flex-column flex-grow-1 gap-4">
+        <div class="mt-8 d-flex justify-center align-center flex-column flex-grow-1 gap-4 mb-4">
                 <MudText class="mr-2"Typo="Typo.h6">
                     Welcome @context.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value,
                     need a carpark?
@@ -33,7 +33,7 @@
             </HeaderContent>
             <RowTemplate Context="col">
                 <MudTd DataLabel="Id">@col.CarparkId</MudTd>
-                <MudTd DataLabel="Address">@col.Address</MudTd>
+                <MudTd Style="word-break: break-word;" DataLabel="Address">@col.Address</MudTd>
                 <MudTd DataLabel="Type">@col.Type</MudTd>
                 <MudTd DataLabel="Short Term Parking">@col.ShortTermParkingType</MudTd>
                 <MudTd DataLabel="Free Parking">@col.FreeParking</MudTd>

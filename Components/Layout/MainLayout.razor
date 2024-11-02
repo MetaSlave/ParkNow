@@ -28,27 +28,30 @@
 <MudSnackbarProvider />
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">ParkNow</MudText>
-        <MudSpacer />
-                <AuthorizeView>
+        <AuthorizeView>
             <Authorized>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <MudText Typo="Typo.h5" Class="ml-3">ParkNow</MudText>
+                <MudSpacer />
                 <MudPaper Class="d-flex flex-row-reverse gap-4" style="background-color:transparent;"  Elevation="0">
-                        <MudLink @onclick='() => NavigateToYourUrl("Account/Logout")' class="mud-nav-link mud-ripple">
-                            <MudIcon Icon="@Icons.Material.Filled.Logout" style="color:white !important;" Class="mr-3"></MudIcon>
-                            <MudText style="color:white !important;">Logout</MudText>
-                        </MudLink>
+                    <MudLink @onclick='() => NavigateToYourUrl("Account/Logout")' class="mud-nav-link mud-ripple">
+                        <MudIcon Icon="@Icons.Material.Filled.Logout" style="color:white !important;" Class="mr-3"></MudIcon>
+                        <MudText style="color:white !important;">Logout</MudText>
+                    </MudLink>
                 </MudPaper>
             </Authorized>
             <NotAuthorized>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" Href="/" OnClick="@((e) => NavigateToYourUrl("/"))" />
+                <MudText Typo="Typo.h5" Class="ml-3">ParkNow</MudText>
+                <MudSpacer />
                 <MudPaper Class="d-flex flex-row-reverse gap-4" style="background-color:transparent;" Elevation="0">
-                        <MudLink @onclick='() => NavigateToYourUrl("Account/Register")' Href="Account/Register" class="mud-nav-link mud-ripple">
-                            <MudIcon Icon="@Icons.Material.Filled.Person" style="color:white !important;" Class="mr-3"></MudIcon>
-                            <MudText style="color:white !important;">Register</MudText>
+                        <MudLink @onclick='() => NavigateToYourUrl("Account/Register")' Href="Account/Register" class="mud-nav-link mud-ripple d-flex align-center justify-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" style="color:white !important;" Class="mr-0 mr-sm-3"></MudIcon>
+                            <MudText style="color:white !important;" Class="d-none d-sm-flex">Register</MudText>
                         </MudLink>
-                        <MudLink @onclick='() => NavigateToYourUrl("Account/Login")' Href="Account/Login" class="mud-nav-link mud-ripple">
-                            <MudIcon Icon="@Icons.Material.Filled.Login" style="color:white !important;" Class="mr-3"></MudIcon>
-                            <MudText style="color:white !important;">Login</MudText>
+                        <MudLink @onclick='() => NavigateToYourUrl("Account/Login")' Href="Account/Login" class="mud-nav-link mud-ripple d-flex align-center justify-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Login" style="color:white !important;" Class="mr-0 mr-sm-3"></MudIcon>
+                            <MudText style="color:white !important;" Class="d-none d-sm-flex">Login</MudText>
                         </MudLink>
                 </MudPaper>
             </NotAuthorized>

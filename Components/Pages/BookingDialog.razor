@@ -1,11 +1,12 @@
 ﻿@using ParkNow.Models
+@inject IBookingService BookingService
 
 <MudDialog>
     <TitleContent>
-        Dialog Title
+        Are you sure you want to end your parking session now?
     </TitleContent>
     <DialogContent>
-        Dialog Content
+        You will be refunded for the remaining session
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
