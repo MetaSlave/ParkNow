@@ -10,14 +10,36 @@
 <PageTitle>My Bookings</PageTitle>
 <AuthorizeView>
     <Authorized> 
-        <MudPaper Height="500px" Width="100%">
+        <MudPaper Height="600px" Width="100%">
             <MudContainer style=@bookingView Fixed="true">
                 <div class="d-flex flex-row align-center justify-center pt-4 pb-4">
                     <MudText class="mr-2"Typo="Typo.h6">Your Bookings</MudText>
                     <MudSpacer/>
                 </div>
-                <div style="height: 400px; overflow: auto;">
-                    <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" Virtualize="true" LoadingProgressColor="Color.Info" Class="overflow-auto">
+                <div style="height: 500px; overflow: auto;">
+                    <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" Virtualize="true" LoadingProgressColor="Color.Info" Class="overflow-auto" Filter="new Func<Booking,bool>(FilterFunc)">
+                        <ToolBarContent>
+                            <div class="d-flex flex-row gap-4 align-center justify-center" style="width: 100%;">
+                                <MudTextField @bind-Value="searchString" 
+                                    Placeholder="Search"
+                                    Label=" " 
+                                    Adornment="Adornment.End" 
+                                    AdornmentIcon="@Icons.Material.Filled.Search"
+                                    Clearable="true"
+                                    IconSize="Size.Medium"/>
+                                <MudSpacer/>
+                                <MudDatePicker 
+                                    Label="From" 
+                                    Color="Color.Secondary"
+                                    Clearable="true"
+                                    DateChanged="OnStartDateRangeChanged"/>
+                                <MudDatePicker 
+                                    Label="To" 
+                                    Color="Color.Secondary"
+                                    Clearable="true"
+                                    DateChanged="OnEndDateRangeChanged"/>
+                            </div>
+                        </ToolBarContent>
                         <RowTemplate Context="col">
                             <div class="d-flex flex-row align-center justify-start gap-2 pt-4 pb-4">
                                 <MudIconButton class="ml-2" Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleExpand(col))" Size="Size.Medium"/>
@@ -120,6 +142,9 @@
     private string editBookingView = "display:none;";
     private string username = "";
     private decimal price = 0M;
+    private string searchString = "";
+    private DateTime? startDateFilter;
+    private DateTime? endDateFilter;
 
     [SupplyParameterFromForm]
     private EditBookingForm model { get; set; } = new();
@@ -168,15 +193,51 @@
             User_Bookings = new List<Booking>();
         }
     }
+    private async Task OnStartDateRangeChanged(DateTime? date) {
+        startDateFilter = date;
+        // Force table refresh
+        StateHasChanged();
+    }
+    private async Task OnEndDateRangeChanged(DateTime? date) {
+        endDateFilter = date;
+        // Force table refresh
+        StateHasChanged();
+    }
+    private bool FilterFunc(Booking booking) {
+        // First check the date range
+        bool dateMatch = true;
+        if (startDateFilter.HasValue && endDateFilter.HasValue)
+        {
+            var startDate = startDateFilter.Value.Date;
+            var endDate = endDateFilter.Value.Date;
+            dateMatch = booking.StartTime?.Date <= endDate && 
+                    booking.EndTime?.Date >= startDate;
+        }
+        else if (startDateFilter.HasValue)
+        {
+            dateMatch = booking.StartTime?.Date >= startDateFilter.Value.Date;
+        }
+        else if (endDateFilter.HasValue)
+        {
+            dateMatch = booking.EndTime?.Date <= endDateFilter.Value.Date;
+        }
 
-    private void SwapBookingView()
-    {  
+        // Then check the text search
+        bool textMatch = string.IsNullOrWhiteSpace(searchString) || 
+            booking.BookingId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+            booking.Status.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+            booking.Carpark.CarparkId.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+            booking.Vehicle.LicensePlate.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+
+        // Item must match both filters
+        return dateMatch && textMatch;
+    }
+    private void SwapBookingView() {  
         bookingView = "display:block;";
         editBookingView = "display:none;";
         StateHasChanged();
     }
-    private void EditBookingView(Booking booking)
-    {  
+    private void EditBookingView(Booking booking) {  
         // If already completed
         if (booking.Status == Booking.Statuses.Completed) {
             Snackbar.Add("Booking has already completed", Severity.Error);

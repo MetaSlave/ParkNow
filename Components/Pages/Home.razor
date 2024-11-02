@@ -23,7 +23,7 @@
                     need a carpark?
                 </MudText>
                 <MudPaper Width="22em" Elevation="0"> 
-                    <MudTextField Immediate="true" @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+                    <MudTextField Immediate="true" @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
                 </MudPaper>
         </div>
         <MudTable T="Carpark" class="mt-3" Items="@Carparks" OnRowClick="@NavigateToYourUrl" Height="450px" Hover="true" Breakpoint="Breakpoint.Sm" FixedHeader="true" Virtualize="true" SortLabel="Sort By" Elevation="0" Filter="new Func<Carpark,bool>(FilterFunc)">
