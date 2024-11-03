@@ -24,6 +24,10 @@
                                 @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password"/>
                     <MudStaticTextField Label="Re-enter Password" HelperText="Re-enter the password" Class="mt-3"
                                 @bind-Value="model.Password2" For="@(() => model.Password2)" InputType="InputType.Password"/>
+                    @if (showRegisterError)
+                    {
+                        <MudText Color="Color.Error" Class="mt-1">Username already exists</MudText>
+                    }
                 </MudCardContent>
                 <MudCardActions>
                     <MudStaticButton FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Register</MudStaticButton>
@@ -37,6 +41,7 @@
 @code {
     [CascadingParameter]
     public required HttpContext HttpContext{get; set;}
+    private bool showRegisterError = false;
 
     [SupplyParameterFromForm]
     private RegisterAccountForm model { get; set; } = new();
@@ -69,6 +74,11 @@
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync("parknow-auth",principal);
             Navigate.NavigateTo("/");
+        }
+        else {
+            // Register error
+            showRegisterError = true;
+            StateHasChanged();
         }
     }
 }
