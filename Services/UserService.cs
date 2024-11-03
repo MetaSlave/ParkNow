@@ -16,6 +16,9 @@ public class UserService : IUserService
     public async Task<User> GetUser (string username) {
         return await _context.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
     }
+    public async Task<User.Roles> GetUserRole (string username) {
+        return (await _context.Users.Where(u => u.Username == username).FirstOrDefaultAsync()).Role;
+    }
     
     public bool VerifyPassword(string password, string hash, string salt) {
         var byte_salt = Encoding.UTF8.GetBytes(salt);
@@ -47,7 +50,7 @@ public class UserService : IUserService
             return false;
         }
         else {
-            User temp = new User{Username=username,Password=password,Email=email};
+            User temp = new User{Username=username,Password=password,Email=email, Role=User.Roles.User};
             _context.Users.Add(temp);
             await _context.SaveChangesAsync();
         }

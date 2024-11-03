@@ -56,6 +56,9 @@
         bool register_success = await UserService.VerifyCredentials(model.Username,model.Password);
         if (register_success) {
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, model.Username) };
+            // Get user roles from database
+            var userRole = await UserService.GetUserRole(model.Username);
+            claims.Add(new Claim(ClaimTypes.Role, userRole.ToString()));
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync("parknow-auth",principal);
