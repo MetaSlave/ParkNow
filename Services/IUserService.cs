@@ -9,6 +9,7 @@ public interface IUserService
 {
     Task<User> GetUser (string username);
     Task<User.Roles> GetUserRole (string username);
+    Task<List<User>> GetAllUsers ();
     string HashPassword(string password);
     bool VerifyPassword(string password, string hash, string salt);
     Task<bool> VerifyCredentials(string username, string password);

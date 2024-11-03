@@ -12,7 +12,7 @@ using ParkNow.Data;
 namespace ParkNow.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241103133802_First Migration")]
+    [Migration("20241103135058_First Migration")]
     partial class FirstMigration
     {
         /// <inheritdoc />
@@ -239,7 +239,6 @@ namespace ParkNow.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Username")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("VoucherId");
@@ -314,9 +313,7 @@ namespace ParkNow.Migrations
                 {
                     b.HasOne("ParkNow.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("Username")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Username");
 
                     b.Navigation("User");
                 });

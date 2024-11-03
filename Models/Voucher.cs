@@ -10,10 +10,10 @@ public class Voucher
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public required string VoucherId {get; set;}
     
-    public string Username { get; set; } 
+    public string? Username { get; set; } 
 
     [ForeignKey(nameof(Username))]
-    public required User User {get; set;}
+    public User? User {get; set;}
 
     [Precision(18, 2)]
     public decimal Amount {get; set;}

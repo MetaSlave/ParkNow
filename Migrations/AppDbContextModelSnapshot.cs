@@ -236,7 +236,6 @@ namespace ParkNow.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Username")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("VoucherId");
@@ -311,9 +310,7 @@ namespace ParkNow.Migrations
                 {
                     b.HasOne("ParkNow.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("Username")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Username");
 
                     b.Navigation("User");
                 });

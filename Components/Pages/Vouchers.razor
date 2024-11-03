@@ -1,0 +1,16 @@
+﻿@page "/vouchers"
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize(Roles = "Admin")]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserService UserService
+@inject ISnackbar Snackbar
+@inject ILogger<Vouchers> Logger
+
+<PageTitle>Vouchers</PageTitle>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+}

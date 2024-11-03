@@ -76,7 +76,7 @@ namespace ParkNow.Migrations
                 columns: table => new
                 {
                     VoucherId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Issue = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Expiry = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -88,8 +88,7 @@ namespace ParkNow.Migrations
                         name: "FK_Vouchers_Users_Username",
                         column: x => x.Username,
                         principalTable: "Users",
-                        principalColumn: "Username",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Username");
                 });
 
             migrationBuilder.CreateTable(

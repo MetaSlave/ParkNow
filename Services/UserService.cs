@@ -19,6 +19,9 @@ public class UserService : IUserService
     public async Task<User.Roles> GetUserRole (string username) {
         return (await _context.Users.Where(u => u.Username == username).FirstOrDefaultAsync()).Role;
     }
+    public async Task<List<User>> GetAllUsers () {
+        return await _context.Users.ToListAsync();
+    }
     
     public bool VerifyPassword(string password, string hash, string salt) {
         var byte_salt = Encoding.UTF8.GetBytes(salt);
