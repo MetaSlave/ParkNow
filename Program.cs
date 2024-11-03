@@ -54,6 +54,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICarparkService, CarparkService>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
 
 // Hosted Background Services
 builder.Services.AddHostedService<CarparkUpdater>();

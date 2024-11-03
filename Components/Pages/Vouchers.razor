@@ -3,14 +3,146 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserService UserService
+@inject IVoucherService VoucherService
 @inject ISnackbar Snackbar
 @inject ILogger<Vouchers> Logger
 
 <PageTitle>Vouchers</PageTitle>
 
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudCard>
+        <MudCardHeader>
+            <MudText Typo="Typo.h5">Issue New Voucher</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <EditForm Model="@voucherModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="voucherModel.VoucherId"
+                                    Label="Voucher ID"
+                                    Required="true"
+                                    RequiredError="Voucher ID is required!" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="string" Label="Select User" 
+                                 @bind-Value="selectedUserId"
+                                 Required="true">
+                            <MudSelectItem Value="@("all")">All Users</MudSelectItem>
+                            @foreach (var user in All_Users)
+                            {
+                                <MudSelectItem Value="@user.Username">@user.Username (@user.Email)</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudNumericField @bind-Value="voucherModel.Amount"
+                                       Label="Discount Amount"
+                                       Required="true"
+                                       Min="0"
+                                       Format="N2"
+                                       AdornmentIcon="@Icons.Material.Filled.AttachMoney"
+                                       Adornment="Adornment.Start" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudDatePicker @bind-Date="voucherModel.Expiry"
+                                     Label="Expiry Date"
+                                     Required="true"
+                                     MinDate="@DateTime.Today"
+                                     DisableToolbar="false" />
+                    </MudItem>
+                </MudGrid>
+
+                <div class="d-flex justify-end mt-4">
+                    <MudButton ButtonType="ButtonType.Submit"
+                              Variant="Variant.Filled"
+                              Color="Color.Primary"
+                              Size="Size.Large"
+                              StartIcon="@Icons.Material.Filled.Add">
+                        Issue Voucher
+                    </MudButton>
+                </div>
+            </EditForm>
+        </MudCardContent>
+    </MudCard>
+
+    @if (isLoading)
+    {
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    }
+</MudContainer>
+
 @code {
+    private VoucherCreateModel voucherModel = new();
+    private string selectedUserId = string.Empty;
+    private bool isLoading = false;
+    private IEnumerable<User> All_Users = new List<User>();
+
     protected override async Task OnInitializedAsync()
     {
+        // Get all users
+        All_Users = await UserService.GetAllUsers();
+    }
 
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            isLoading = true;
+
+            if (selectedUserId == "all")
+            {
+                // Issue vouchers for all users
+                foreach (var user in All_Users)
+                {
+                    await CreateVoucherForUser(user.Username);
+                }
+                Snackbar.Add("Vouchers issued successfully for all users!", Severity.Success);
+            }
+            else
+            {
+                // Issue voucher for single user
+                await CreateVoucherForUser(selectedUserId);
+                Snackbar.Add("Voucher issued successfully!", Severity.Success);
+            }
+
+            // Reset form
+            voucherModel = new();
+            selectedUserId = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error issuing voucher");
+            Snackbar.Add("Error issuing voucher. Please try again.", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateVoucherForUser(string username)
+    {
+        var voucher = new Voucher
+        {
+            VoucherId = voucherModel.VoucherId,
+            Username = username,
+            Amount = voucherModel.Amount,
+            Issue = DateTime.Now,
+            Expiry = voucherModel.Expiry ?? DateTime.Now.AddMonths(1)
+        };
+
+        await VoucherService.CreateVoucher(voucher);
+    }
+
+    public class VoucherCreateModel
+    {
+        public string VoucherId { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public DateTime? Expiry { get; set; }
     }
 }
