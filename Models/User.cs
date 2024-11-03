@@ -1,7 +1,9 @@
 /*
 This class implements the User entity with the attributes
-UserId, Password, Username, Email
+Username, Password, Email, Role
 */
+using System.ComponentModel.DataAnnotations;
+
 namespace ParkNow.Models;
 public class User
 {
@@ -10,9 +12,9 @@ public class User
         User,
         Admin
     }
-    public int UserId {get; set;}
-    public required string Password {get; set;}
+    [Key]
     public required string Username {get; set;}
+    public required string Password {get; set;}
     public required string Email {get; set;}
     public required Roles Role {get; set;}
 }

@@ -19,7 +19,9 @@ public class Booking {
     [ForeignKey("PaymentId")]
     public Payment? Payment {get; set;}
 
-    [ForeignKey("UserId")]
+    public string Username { get; set; } 
+
+    [ForeignKey(nameof(Username))]
     public required User User {get; set;}
 
     [ForeignKey("VehicleId")]

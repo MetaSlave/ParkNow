@@ -53,8 +53,9 @@ namespace ParkNow.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
@@ -65,7 +66,7 @@ namespace ParkNow.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("Username");
 
                     b.HasIndex("VehicleId");
 
@@ -153,8 +154,8 @@ namespace ParkNow.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("VoucherId")
-                        .HasColumnType("int");
+                    b.Property<string>("VoucherId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("PaymentId");
 
@@ -168,11 +169,8 @@ namespace ParkNow.Migrations
 
             modelBuilder.Entity("ParkNow.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -185,11 +183,7 @@ namespace ParkNow.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId");
+                    b.HasKey("Username");
 
                     b.ToTable("Users");
                 });
@@ -215,23 +209,21 @@ namespace ParkNow.Migrations
                     b.Property<string>("Model")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("VehicleId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("Username");
 
                     b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("ParkNow.Models.Voucher", b =>
                 {
-                    b.Property<int>("VoucherId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VoucherId"));
+                    b.Property<string>("VoucherId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
@@ -243,12 +235,13 @@ namespace ParkNow.Migrations
                     b.Property<DateTime>("Issue")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("VoucherId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("Username");
 
                     b.ToTable("Vouchers");
                 });
@@ -267,7 +260,7 @@ namespace ParkNow.Migrations
 
                     b.HasOne("ParkNow.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("Username")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -307,7 +300,7 @@ namespace ParkNow.Migrations
                 {
                     b.HasOne("ParkNow.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("Username")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -318,7 +311,7 @@ namespace ParkNow.Migrations
                 {
                     b.HasOne("ParkNow.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("Username")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

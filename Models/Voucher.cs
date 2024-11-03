@@ -7,10 +7,14 @@ using Microsoft.EntityFrameworkCore;
 namespace ParkNow.Models;
 public class Voucher
 {
-    public required int VoucherId {get; set;}
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public required string VoucherId {get; set;}
     
-    [ForeignKey("UserId")]
+    public string Username { get; set; } 
+
+    [ForeignKey(nameof(Username))]
     public required User User {get; set;}
+
     [Precision(18, 2)]
     public decimal Amount {get; set;}
     public DateTime Issue {get; set;}

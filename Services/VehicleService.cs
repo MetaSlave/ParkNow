@@ -1,7 +1,6 @@
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.EntityFrameworkCore;
 using ParkNow.Data;
-using ParkNow.Migrations;
 using ParkNow.Models;
 namespace ParkNow.Services;
 

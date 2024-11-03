@@ -12,8 +12,8 @@ using ParkNow.Data;
 namespace ParkNow.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241011064058_removed duplicate registraion number for vehicles as licenseplate alr = registration number")]
-    partial class RemovedDuplicateRegistrationNumberForVehiclesAsLicensePlate
+    [Migration("20241103133802_First Migration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,27 +38,40 @@ namespace ParkNow.Migrations
 
                     b.Property<string>("CarparkId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("Cost")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Cost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PaymentId")
+                    b.Property<int?>("PaymentId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime?>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("VehicleId")
                         .HasColumnType("int");
 
                     b.HasKey("BookingId");
+
+                    b.HasIndex("CarparkId");
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("Username");
+
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("Bookings");
                 });
@@ -127,11 +140,16 @@ namespace ParkNow.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
 
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("Discount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -139,21 +157,23 @@ namespace ParkNow.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("VoucherId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("PaymentId");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
+                    b.HasIndex("VoucherId");
 
                     b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("ParkNow.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -163,11 +183,10 @@ namespace ParkNow.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Username");
 
                     b.ToTable("Users");
                 });
@@ -183,6 +202,9 @@ namespace ParkNow.Migrations
                     b.Property<int>("CarType")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LicensePlate")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -190,12 +212,113 @@ namespace ParkNow.Migrations
                     b.Property<string>("Model")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("VehicleId");
 
+                    b.HasIndex("Username");
+
                     b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("ParkNow.Models.Voucher", b =>
+                {
+                    b.Property<string>("VoucherId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Expiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Issue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("VoucherId");
+
+                    b.HasIndex("Username");
+
+                    b.ToTable("Vouchers");
+                });
+
+            modelBuilder.Entity("ParkNow.Models.Booking", b =>
+                {
+                    b.HasOne("ParkNow.Models.Carpark", "Carpark")
+                        .WithMany()
+                        .HasForeignKey("CarparkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ParkNow.Models.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
+                    b.HasOne("ParkNow.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ParkNow.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Carpark");
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("ParkNow.Models.Payment", b =>
+                {
+                    b.HasOne("ParkNow.Models.Booking", "Booking")
+                        .WithOne()
+                        .HasForeignKey("ParkNow.Models.Payment", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ParkNow.Models.Voucher", "Voucher")
+                        .WithMany()
+                        .HasForeignKey("VoucherId");
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Voucher");
+                });
+
+            modelBuilder.Entity("ParkNow.Models.Vehicle", b =>
+                {
+                    b.HasOne("ParkNow.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("Username")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ParkNow.Models.Voucher", b =>
+                {
+                    b.HasOne("ParkNow.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("Username")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
