@@ -9,6 +9,8 @@ The following additional attributes are updated via a Background Service using
 information from the gov api:
 https://api.data.gov.sg/v1/transport/carpark-availability 
 */
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ParkNow.Models;
 public class Carpark {
     public required string CarparkId {get; set;}
@@ -29,4 +31,7 @@ public class Carpark {
     // Bottom Might Not Need
     public required double GantryHeight {get; set;}
     public required bool CarparkBasement {get; set;}
+
+    [NotMapped]
+    public double Distance { get; set; }
 }
