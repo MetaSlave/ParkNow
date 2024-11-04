@@ -371,13 +371,11 @@
             errors.Add("End date and time must be after the start date and time");
         }
         else {
-            Logger.LogInformation(endDateTime.Value.ToString());
-            Logger.LogInformation(startDateTime.Value.ToString());
-            if ((endDateTime.Value - startDateTime.Value).Hours > 24) {
+            if ((endDateTime.Value - startDateTime.Value).TotalDays > 1) {
                 errors.Add("Booking cannot exceed 24 hours");
             }
 
-            if ((endDateTime.Value - DateTime.Now).Hours > 168) {
+            if ((endDateTime.Value - DateTime.Now).TotalDays > 7) {
                 errors.Add("Booking cannot be more than 1 week into the future");
             }
         }
