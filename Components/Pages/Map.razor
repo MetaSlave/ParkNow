@@ -44,7 +44,7 @@
     <div id="map" style="height: 100%; width: 100%;"></div>
     @if (selectedCarpark != null && showCard)
     {
-        <MudCard Style="position: absolute; top: 20px; right: 20px; width: 300px; z-index: 1000;">
+        <MudCard Style="position: absolute; width: 300px; z-index: 1000; top: 50%; left: 50%; transform: translate(-50%, -50%);">
             <MudCardContent>
                 <MudText Typo="Typo.h6">@selectedCarpark.CarparkId</MudText>
                 <MudText>Address: @selectedCarpark.Address</MudText>
