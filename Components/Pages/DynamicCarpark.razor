@@ -371,6 +371,8 @@
             errors.Add("End date and time must be after the start date and time");
         }
         else {
+            Logger.LogInformation(endDateTime.Value.ToString());
+            Logger.LogInformation(startDateTime.Value.ToString());
             if ((endDateTime.Value - startDateTime.Value).Hours > 24) {
                 errors.Add("Booking cannot exceed 24 hours");
             }
@@ -414,25 +416,27 @@
         }
         else {
             try {
-                    // Remove any whitespace and split by '/'
-                    var parts = model2.Expiry.Trim().Split('/');
-                    if (parts.Length != 2) return true;
+                // Remove any whitespace and split by '/'
+                var parts = model2.Expiry.Trim().Split('/');
+                if (parts.Length != 2) return true;
 
-                    // Parse month and year
-                    if (!int.TryParse(parts[0], out int month) || !int.TryParse(parts[1], out int year))
-                        return true;
+                // Parse month and year
+                if (!int.TryParse(parts[0], out int month) || !int.TryParse(parts[1], out int year))
+                    return true;
 
-                    // Add 2000 to convert YY to YYYY
-                    year += 2000;
+                // Add 2000 to convert YY to YYYY
+                year += 2000;
 
-                    // Create a date for the last day of the expiry month
-                    var expiryDate = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
+                // Create a date for the last day of the expiry month
+                var expiryDate = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
 
-                    // Compare with current date
-                    return DateTime.Today > expiryDate;
+                // Compare with current date
+                if(DateTime.Today > expiryDate) {
+                    errors.Add("Credit Card has already expired");
                 }
+            }
             catch {
-                return true; // If any error occurs, consider it expired
+                errors.Add("Credit Card has already expired");
             }
         }
 
