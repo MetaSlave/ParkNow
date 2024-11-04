@@ -370,6 +370,16 @@
         {
             errors.Add("End date and time must be after the start date and time");
         }
+        else {
+            if ((endDateTime.Value - startDateTime.Value).Hours > 24) {
+                errors.Add("Booking cannot exceed 24 hours");
+            }
+
+            if ((endDateTime.Value - DateTime.Now).Hours > 168) {
+                errors.Add("Booking cannot be more than 1 week into the future");
+            }
+        }
+
 
         if (price <= 0) {
             errors.Add("Booking is unavailable for this time period");
@@ -401,6 +411,29 @@
         if (string.IsNullOrWhiteSpace(model2.Expiry))
         {
             errors.Add("Credit Card Expiry is required");
+        }
+        else {
+            try {
+                    // Remove any whitespace and split by '/'
+                    var parts = model2.Expiry.Trim().Split('/');
+                    if (parts.Length != 2) return true;
+
+                    // Parse month and year
+                    if (!int.TryParse(parts[0], out int month) || !int.TryParse(parts[1], out int year))
+                        return true;
+
+                    // Add 2000 to convert YY to YYYY
+                    year += 2000;
+
+                    // Create a date for the last day of the expiry month
+                    var expiryDate = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
+
+                    // Compare with current date
+                    return DateTime.Today > expiryDate;
+                }
+            catch {
+                return true; // If any error occurs, consider it expired
+            }
         }
 
         if (errors.Any())
