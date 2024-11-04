@@ -212,18 +212,18 @@
                 }
             }
         }
-        catch (Exception ex)
+        catch
         {
             Snackbar.Add("Error loading bookings", Severity.Error);
         }
     }
 
-    private async Task OnStartDateRangeChanged(DateTime? date) {
+    private void OnStartDateRangeChanged(DateTime? date) {
         startDateFilter = date;
         // Force table refresh
         StateHasChanged();
     }
-    private async Task OnEndDateRangeChanged(DateTime? date) {
+    private void OnEndDateRangeChanged(DateTime? date) {
         endDateFilter = date;
         // Force table refresh
         StateHasChanged();

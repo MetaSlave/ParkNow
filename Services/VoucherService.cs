@@ -14,10 +14,10 @@ public class VoucherService : IVoucherService
         _logger = logger;
     }
 
-    public async Task<bool> CreateVoucher(Voucher Voucher) {
+    public async Task<bool> CreateVoucher(Voucher voucher) {
         try {
             // Add Voucher
-            await _context.Vouchers.AddAsync(Voucher);
+            await _context.Vouchers.AddAsync(voucher);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -31,13 +31,13 @@ public class VoucherService : IVoucherService
     public async Task<List<Voucher>> GetAllVouchers() {
         return await _context.Vouchers.Where(v => v.Deleted == false).ToListAsync();
     }
-    public async Task<Voucher> GetVoucher(string VoucherId) {
-        return await _context.Vouchers.Where(v => v.VoucherId == VoucherId).FirstOrDefaultAsync();
+    public async Task<Voucher> GetVoucher(string voucherId) {
+        return await _context.Vouchers.Where(v => v.VoucherId == voucherId).FirstOrDefaultAsync();
     }
 
-    public async Task<bool> DeleteVoucher(string VoucherId) {
+    public async Task<bool> DeleteVoucher(string voucherId) {
         try {
-            Voucher? db_Voucher = await _context.Vouchers.Where(v => v.VoucherId == VoucherId).FirstOrDefaultAsync();
+            Voucher? db_Voucher = await _context.Vouchers.Where(v => v.VoucherId == voucherId).FirstOrDefaultAsync();
             if (db_Voucher == null) {
                 return false;
             }
@@ -50,8 +50,8 @@ public class VoucherService : IVoucherService
         return true;
     }
 
-    public async Task<(bool success,decimal amount)> VerifyVoucher(string Username, string VoucherId) {
-        var voucher = await _context.Vouchers.Where(v => v.VoucherId == VoucherId && (v.Username == Username || v.Username == null)).SingleOrDefaultAsync();
+    public async Task<(bool success,decimal amount)> VerifyVoucher(string username, string voucherId) {
+        var voucher = await _context.Vouchers.Where(v => v.VoucherId == voucherId && (v.Username == username || v.Username == null)).SingleOrDefaultAsync();
         if (voucher == null) {
             return (false,-1.0M);
         }

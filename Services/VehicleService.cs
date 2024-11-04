@@ -18,9 +18,6 @@ public class VehicleService : IVehicleService
     public async Task<List<Vehicle>> GetUserVehicles(string username) {
         return await _context.Vehicles.Where(v => v.User.Username == username && v.Deleted != true).ToListAsync();
     }
-    public async Task<List<Vehicle>> GetNonActiveUserVehicles(string username) {
-        return await _context.Vehicles.Where(v => v.User.Username == username && v.Deleted != true).ToListAsync();
-    }
 
     public async Task<Vehicle> GetVehicle(string licenseplate) {
         return await _context.Vehicles.Where(v => v.LicensePlate == licenseplate).FirstOrDefaultAsync();

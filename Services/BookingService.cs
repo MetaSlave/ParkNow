@@ -34,8 +34,8 @@ public class BookingService : IBookingService
         await _context.SaveChangesAsync();
         return User_Bookings;
     }
-    public async Task<Booking> GetBooking(int BookingId) {
-        return await _context.Bookings.Where(b => b.BookingId == BookingId).FirstOrDefaultAsync();
+    public async Task<Booking> GetBooking(int bookingId) {
+        return await _context.Bookings.Where(b => b.BookingId == bookingId).FirstOrDefaultAsync();
     }
 
     public async Task<bool> CreateBooking(Booking booking) {
@@ -104,10 +104,10 @@ public class BookingService : IBookingService
        }
         return true;
     }
-    public async Task<bool> DeleteBooking(int BookingId) {
+    public async Task<bool> DeleteBooking(int bookingId) {
         try {
             // Delete Booking
-            Booking? db_Booking = await _context.Bookings.Where(b => b.BookingId == BookingId).FirstOrDefaultAsync();
+            Booking? db_Booking = await _context.Bookings.Where(b => b.BookingId == bookingId).FirstOrDefaultAsync();
             if (db_Booking == null) {
                 return false;
             }
@@ -127,7 +127,7 @@ public class BookingService : IBookingService
         public DateTime End { get; set; }
     }
 
-    public async Task<Decimal>? CalculatePrice(DateTime start, DateTime end, Carpark carpark) {
+    public Decimal CalculatePrice(DateTime start, DateTime end, Carpark carpark) {
         List<TimeSlot> paid_slots = new List<TimeSlot>();
 
         List<TimeSlot> day_slots = new List<TimeSlot>();

@@ -17,28 +17,7 @@ public class CarparkService : ICarparkService
         return await _context.Carparks.Where(c => c.ShortTermParkingType != "NO").ToListAsync();
     }
 
-    public async Task<Carpark> GetCarpark(string carparkid) {
-        return await _context.Carparks.Where(c => c.CarparkId == carparkid).FirstOrDefaultAsync();
-        /*
-        Carpark? fetched = await _context.Carparks.Where(c => c.CarparkId == carparkid).FirstOrDefaultAsync();
-
-        if (fetched == null) {
-            return null;
-        }
-        return new Carpark{
-            CarparkId = fetched.CarparkId,
-            Address = fetched.Address,
-            XCord = fetched.XCord,
-            YCord = fetched.YCord,
-            Type = fetched.Type,
-            SystemType = fetched.SystemType,
-            ShortTermParkingType = fetched.ShortTermParkingType,
-            FreeParking = fetched.FreeParking,
-            NightParking = fetched.NightParking,
-            CentralCharge = fetched.CentralCharge,
-            GantryHeight = fetched.GantryHeight,
-            CarparkBasement = fetched.CarparkBasement,
-        };
-        */
+    public async Task<Carpark> GetCarpark(string carparkId) {
+        return await _context.Carparks.Where(c => c.CarparkId == carparkId).FirstOrDefaultAsync();
     }
 }
