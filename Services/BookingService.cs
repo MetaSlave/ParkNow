@@ -71,7 +71,7 @@ public class BookingService : IBookingService
                 Discount = voucher.Amount,
                 Booking = booking,
                 Timestamp = DateTime.Now,
-                Amount = booking.Cost,
+                Amount = Math.Max(0, booking.Cost - voucher.Amount),
                 Status = Payment.Statuses.Success
             };
             await _context.Payments.AddAsync(temp_pay);
@@ -88,33 +88,46 @@ public class BookingService : IBookingService
 
     public async Task<bool> UpdateBooking(Booking booking) {
        try {
-            // Add Booking
+            // Update Booking and Payment
             Booking? db_Booking = await _context.Bookings.Where(b => b.BookingId == booking.BookingId).FirstOrDefaultAsync();
-            if (db_Booking == null) {
+            Payment? db_Payment = await _context.Payments.Where(p => p.Booking.BookingId == booking.BookingId).FirstOrDefaultAsync();
+            if (db_Booking == null || db_Payment == null) {
                 return false;
             }
+
             db_Booking.StartTime = booking.StartTime;
             db_Booking.EndTime= booking.EndTime;
             db_Booking.Cost = booking.Cost;
             db_Booking.Status = booking.Status;
+
+            if (db_Payment.Discount != null) {
+                db_Payment.Amount = Math.Max(0,booking.Cost - db_Payment.Discount.Value);
+            }
+            else {
+                db_Payment.Amount = booking.Cost;
+            }
             await _context.SaveChangesAsync();
        }
-       catch {
+       catch (Exception ex) {
+            _logger.LogError(ex.Message);
             return false;
        }
         return true;
     }
     public async Task<bool> DeleteBooking(int bookingId) {
         try {
-            // Delete Booking
+            // Delete Booking and Payment
             Booking? db_Booking = await _context.Bookings.Where(b => b.BookingId == bookingId).FirstOrDefaultAsync();
-            if (db_Booking == null) {
+            Payment? db_Payment = await _context.Payments.Where(p => p.Booking.BookingId == bookingId).FirstOrDefaultAsync();
+            if (db_Booking == null || db_Payment == null) {
                 return false;
             }
-            _context.Remove(db_Booking);
+            _context.Payments.Remove(db_Payment);
+            _context.Bookings.Remove(db_Booking);
             await _context.SaveChangesAsync();
        }
-       catch {
+       catch (Exception ex) {
+            _logger.LogError(ex.Message);
             return false;
        }
         return true;

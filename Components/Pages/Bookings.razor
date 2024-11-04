@@ -92,7 +92,7 @@
                                         </div>
                                         <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
                                             <MudText Class="font-weight-bold" Style="min-width: 140px;">Cost:</MudText>
-                                            <MudText Style="flex: 1;">$@col.Cost.ToString("F2")</MudText>
+                                            <MudText Style="flex: 1;">$@col.Payment.Amount.ToString("F2")</MudText>
                                         </div>
                                         @if (col.Payment.Voucher != null) {
                                             <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
@@ -133,7 +133,7 @@
                         <MudDatePicker Color="Color.Secondary" Date="@model.StartDate" DateChanged="@(date => UpdateStartDate(date))"/>
                         <MudDatePicker Color="Color.Secondary" Date="@model.EndDate" DateChanged="@(date => UpdateEndDate(date))"/>
                     </div>
-                    <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText>
+                    <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@((price - discount) <= 0 ? "Free" : $"{price - discount}")</MudText>
                     <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
                         <MudStaticButton FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary">Change</MudStaticButton>
                         <MudButton OnClick="DeleteBooking" Variant="Variant.Filled" Color="Color.Error">Delete</MudButton>
@@ -153,6 +153,7 @@
     private string editBookingView = "display:none;";
     private string username = "";
     private decimal price = 0M;
+    private decimal discount = 0M;
     private string searchString = "";
     private DateTime? startDateFilter;
     private DateTime? endDateFilter;
@@ -276,31 +277,34 @@
         model.EndDate = booking.EndTime?.Date;
         model.EndTime = booking.EndTime?.TimeOfDay;
         model.Booking = booking;
+        if (model.Booking.Payment.Discount != null) {
+            discount = model.Booking.Payment.Discount.Value;
+        }
         StateHasChanged();
     }
-    private async Task UpdateStartDate(DateTime? date) {
+    private void UpdateStartDate(DateTime? date) {
         model.StartDate = date;
-        await UpdatePrice();
+        UpdatePrice();
     }
-    private async Task UpdateEndDate(DateTime? date) {
+    private void UpdateEndDate(DateTime? date) {
         model.EndDate = date;
-        await UpdatePrice();
+        UpdatePrice();
     }
-    private async Task UpdateStartTime(TimeSpan? time) {
+    private void UpdateStartTime(TimeSpan? time) {
         model.StartTime = time;
-        await UpdatePrice();
+        UpdatePrice();
     }
-    private async Task UpdateEndTime(TimeSpan? time) {
+    private void UpdateEndTime(TimeSpan? time) {
         model.EndTime = time;
-        await UpdatePrice();
+        UpdatePrice();
     }
-    private async Task UpdatePrice() {
+    private void UpdatePrice() {
         var startDateTime = model.GetStartDateTime();
         var endDateTime = model.GetEndDateTime();
 
         if (startDateTime.HasValue && endDateTime.HasValue) // Ensure values are not null
         {
-            price = await BookingService.CalculatePrice(startDateTime.Value, endDateTime.Value, model.Booking.Carpark);
+            price = BookingService.CalculatePrice(startDateTime.Value, endDateTime.Value, model.Booking.Carpark);
         }
     }
     private async Task EditBooking() {
@@ -326,7 +330,7 @@
             errors.Add("End date and time must be after the start date and time");
         }
 
-        var price = await BookingService.CalculatePrice(model.GetStartDateTime() ?? DateTime.Now,model.GetEndDateTime() ?? DateTime.Now,model.Booking.Carpark);
+        var price = BookingService.CalculatePrice(model.GetStartDateTime() ?? DateTime.Now,model.GetEndDateTime() ?? DateTime.Now,model.Booking.Carpark);
         if (price <= 0) {
             errors.Add("Booking is unavailable for this time period");
         }
@@ -401,6 +405,8 @@
         var result = await dialog.Result;
         if (!result.Canceled && result.Data is bool data && data)
         {
+            // Calculate new price
+            var current_price = BookingService.CalculatePrice(booking.StartTime ?? DateTime.Now, DateTime.Now, booking.Carpark);
             // Change Booking
             Booking temp = new Booking {
                 BookingId = booking.BookingId,
@@ -410,7 +416,7 @@
                 StartTime = booking.StartTime,
                 EndTime = DateTime.Now,
                 BookingTime = booking.BookingTime,
-                Cost = await BookingService.CalculatePrice(booking.StartTime ?? DateTime.Now, DateTime.Now, booking.Carpark),
+                Cost = current_price,
                 Status = Booking.Statuses.Completed,
             };
             bool success = await BookingService.UpdateBooking(temp);
@@ -441,7 +447,6 @@
         else
             expandedRows.Add(booking);
     }
-
     private Color GetStatusColor(Booking.Statuses status)
     {
         return status switch

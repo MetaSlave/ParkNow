@@ -29,13 +29,13 @@
                     <MudListItem Class="mt-4">
                         <MudText Typo="Typo.h6">Total: @FormatDistance(userLocation.TotalDistance) • @FormatTime(userLocation.TotalTime)</MudText>
                     </MudListItem>
-                    @foreach (var instruction in userLocation.Instructions)
+                    @foreach (var instruction in userLocation.Instructions.Select((item, index) => new { Item = item, Index = index }))
                     {
                         <MudListItem>
                             <div class="d-flex flex-column">
-                                <MudText>@instruction.Text</MudText>
+                                <MudText>@instruction.Item.Text</MudText>
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                    @FormatDistance(instruction.Distance) • @FormatTime(instruction.Time)
+                                    @FormatDistance(instruction.Item.Distance) • @FormatTime(instruction.Item.Time)
                                 </MudText>
                             </div>
                         </MudListItem>

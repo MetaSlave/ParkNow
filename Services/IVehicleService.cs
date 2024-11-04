@@ -34,6 +34,6 @@ public interface IVehicleService
     Sets a vehicle to deleted (DOES NOT DELETE FROM DATABASE)
     Returns true if deleted attributed is successfully set or false if not
     */ 
-    Task<bool> DeleteVehicle(int VehicleId);
+    Task<bool> DeleteVehicle(int vehicleId);
     
 }

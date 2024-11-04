@@ -120,7 +120,7 @@
                             <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">Parking Unavailable</MudText>
                         }
                         else {
-                            <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@(price - discount)</MudText>
+                            <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@((price - discount) <= 0 ? "Free" : $"{price - discount}")</MudText>
                         }
                     </div>
                 </MudCardContent>
@@ -246,21 +246,21 @@
         await JSRuntime.InvokeVoidAsync("initializeMap",Convert.ToDouble(Carpark.XCord),Convert.ToDouble(Carpark.YCord));
     }
 
-    private async Task UpdateStartDate(DateTime? date) {
+    private void UpdateStartDate(DateTime? date) {
         model.StartDate = date;
-        await UpdatePrice();
+        UpdatePrice();
     }
-    private async Task UpdateEndDate(DateTime? date) {
+    private void UpdateEndDate(DateTime? date) {
         model.EndDate = date;
-        await UpdatePrice();
+        UpdatePrice();
     }
-    private async Task UpdateStartTime(TimeSpan? time) {
+    private void UpdateStartTime(TimeSpan? time) {
         model.StartTime = time;
-        await UpdatePrice();
+        UpdatePrice();
     }
-    private async Task UpdateEndTime(TimeSpan? time) {
+    private void UpdateEndTime(TimeSpan? time) {
         model.EndTime = time;
-        await UpdatePrice();
+        UpdatePrice();
     }
 
     private async Task OnVoucherIdChanged() {
@@ -277,13 +277,13 @@
         }
     }
 
-    private async Task UpdatePrice() {
+    private void UpdatePrice() {
         var startDateTime = model.GetStartDateTime();
         var endDateTime = model.GetEndDateTime();
 
         if (startDateTime.HasValue && endDateTime.HasValue) // Ensure values are not null
         {
-            price = await BookingService.CalculatePrice(startDateTime.Value, endDateTime.Value, Carpark);
+            price = BookingService.CalculatePrice(startDateTime.Value, endDateTime.Value, Carpark);
         }
     }
 

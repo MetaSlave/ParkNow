@@ -53,9 +53,13 @@ public class VehicleService : IVehicleService
         return true;
     }
 
-    public async Task<bool> DeleteVehicle(int VehicleId) {
+    public async Task<bool> DeleteVehicle(int vehicleId) {
+        int vehicleBookings = await _context.Bookings.Where(b => b.Vehicle.VehicleId == vehicleId && b.Status != Booking.Statuses.Completed).CountAsync();
+        if (vehicleBookings >= 1) {
+            return false;
+        }
         try {
-            Vehicle? db_Vehicle = await _context.Vehicles.Where(v => v.VehicleId == VehicleId).FirstOrDefaultAsync();
+            Vehicle? db_Vehicle = await _context.Vehicles.Where(v => v.VehicleId == vehicleId).FirstOrDefaultAsync();
             if (db_Vehicle == null) {
                 return false;
             }
