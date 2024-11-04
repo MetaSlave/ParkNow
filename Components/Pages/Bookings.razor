@@ -1,4 +1,5 @@
 ﻿@page "/bookings"
+@implements IDisposable
 @using Microsoft.AspNetCore.Authorization
 @using System.ComponentModel.DataAnnotations
 @inject IBookingService BookingService
@@ -96,7 +97,7 @@
                                         @if (col.Payment.Voucher != null) {
                                             <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
                                                 <MudText Class="font-weight-bold" Style="min-width: 140px;">Voucher:</MudText>
-                                                <MudText Style="flex: 1;">$@col.Payment.Voucher.VoucherId.ToString()</MudText>
+                                                <MudText Style="flex: 1;">@col.Payment.Voucher.VoucherId.ToString()</MudText>
                                             </div>
                                             <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
                                                 <MudText Class="font-weight-bold" Style="min-width: 140px;">Discount:</MudText>
@@ -182,27 +183,41 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider
-            .GetAuthenticationStateAsync();
-        username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
-        if (!string.IsNullOrEmpty(username))
+        await LoadBookings();
+    }
+
+    private async Task LoadBookings()
+    {
+        try 
         {
-            User_Bookings = await BookingService.GetUserBookings(username);   
-            User_Bookings = User_Bookings.OrderBy(b => 
-            b.Status switch
+            var authState = await AuthenticationStateProvider
+                .GetAuthenticationStateAsync();
+            username = authState.User.Claims.FirstOrDefault(u => u.Type == ClaimTypes.Name)?.Value;
+            
+            if (!string.IsNullOrEmpty(username))
             {
-                Booking.Statuses.Active => 0,
-                Booking.Statuses.Scheduled => 1,
-                Booking.Statuses.Completed => 2,
-                Booking.Statuses.Cancelled => 3,
-                _ => 4
-            }).ToList();
+                var bookings = new List<Booking>();
+                bookings = await BookingService.GetUserBookings(username);   
+                if (bookings.Any())
+                {
+                    User_Bookings = bookings.OrderBy(b => 
+                        b.Status switch
+                        {
+                            Booking.Statuses.Active => 0,
+                            Booking.Statuses.Scheduled => 1,
+                            Booking.Statuses.Completed => 2,
+                            Booking.Statuses.Cancelled => 3,
+                            _ => 4
+                        }).ToList();
+                }
+            }
         }
-        else
+        catch (Exception ex)
         {
-            User_Bookings = new List<Booking>();
+            Snackbar.Add("Error loading bookings", Severity.Error);
         }
     }
+
     private async Task OnStartDateRangeChanged(DateTime? date) {
         startDateFilter = date;
         // Force table refresh
@@ -262,7 +277,6 @@
         model.Booking = booking;
         StateHasChanged();
     }
-    
     private async Task UpdateStartDate(DateTime? date) {
         model.StartDate = date;
         await UpdatePrice();
@@ -380,7 +394,6 @@
             Snackbar.Add("Error deleting booking", Severity.Error);
         }
     }
-
     private async Task OpenBookingInfoAsync(Booking booking)
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
@@ -422,7 +435,6 @@
             }
         }
     }
-
     private void ToggleExpand(Booking booking)
     {
         if (expandedRows.Contains(booking))
@@ -440,5 +452,8 @@
             Booking.Statuses.Cancelled => Color.Error,
             _ => Color.Default
         };
+    }
+    public void Dispose()
+    {
     }
 }

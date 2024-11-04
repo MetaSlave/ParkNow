@@ -217,7 +217,7 @@
         if (!string.IsNullOrEmpty(username))
         {
             Vehicles = await VehicleService.GetUserVehicles(username);
-            model.StartDate = DateTime.Now;
+            model.StartDate = DateTime.Now.AddMinutes(1);
             model.StartTime = DateTime.Now.TimeOfDay;
             model.Carpark = carparkid;
 

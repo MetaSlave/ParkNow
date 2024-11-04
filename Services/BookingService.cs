@@ -18,6 +18,8 @@ public class BookingService : IBookingService
         List<Booking> User_Bookings = await _context.Bookings
         .Include(b => b.Vehicle)
         .Include(b => b.Carpark)
+        .Include(b => b.Payment)
+            .ThenInclude(p => p.Voucher)
         .Where(v => v.User.Username == username).ToListAsync();
         foreach (Booking book in User_Bookings) {
             // Completed
@@ -66,6 +68,7 @@ public class BookingService : IBookingService
             await _context.SaveChangesAsync();
             Payment temp_pay = new Payment{
                 Voucher = voucher,
+                Discount = voucher.Amount,
                 Booking = booking,
                 Timestamp = DateTime.Now,
                 Amount = booking.Cost,
