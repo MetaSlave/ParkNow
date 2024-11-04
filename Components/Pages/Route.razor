@@ -190,9 +190,9 @@
             ");
 
             // Load Leaflet first, then Routing Machine
-            await JSRuntime.InvokeVoidAsync("loadScript", "js/leaflet/leaflet.js");
-            await JSRuntime.InvokeVoidAsync("loadScript", "js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.js");
-            await JSRuntime.InvokeVoidAsync("loadScript", "js/location.js");
+            await JSRuntime.InvokeVoidAsync("loadScript", "/js/leaflet/leaflet.js");
+            await JSRuntime.InvokeVoidAsync("loadScript", "/js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.js");
+            await JSRuntime.InvokeVoidAsync("loadScript", "/js/location.js");
 
             // Get location
             await GetUserLocation();

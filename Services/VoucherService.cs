@@ -29,7 +29,7 @@ public class VoucherService : IVoucherService
     }
 
     public async Task<List<Voucher>> GetAllVouchers() {
-        return await _context.Vouchers.ToListAsync();
+        return await _context.Vouchers.Where(v => v.Deleted == false).ToListAsync();
     }
     public async Task<Voucher> GetVoucher(string VoucherId) {
         return await _context.Vouchers.Where(v => v.VoucherId == VoucherId).FirstOrDefaultAsync();
@@ -41,7 +41,7 @@ public class VoucherService : IVoucherService
             if (db_Voucher == null) {
                 return false;
             }
-            _context.Remove(db_Voucher);
+            db_Voucher.Deleted = true;
             await _context.SaveChangesAsync();
        }
        catch {

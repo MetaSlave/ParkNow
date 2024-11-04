@@ -19,4 +19,5 @@ public class Voucher
     public decimal Amount {get; set;}
     public DateTime Issue {get; set;}
     public DateTime Expiry {get; set;}
+    public required bool Deleted {get; set;}
 }

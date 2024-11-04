@@ -248,6 +248,7 @@
                 Username = null,
                 User = null,
                 Issue = DateTime.Now,
+                Deleted = false,
                 Expiry = model.Expiry ?? DateTime.Now.AddMonths(1)
             };
             await VoucherService.CreateVoucher(voucher);
@@ -260,6 +261,7 @@
                 Username = model.Username,
                 Amount = model.Amount,
                 Issue = DateTime.Now,
+                Deleted = false,
                 Expiry = model.Expiry ?? DateTime.Now.AddMonths(1)
             };
             await VoucherService.CreateVoucher(voucher);
