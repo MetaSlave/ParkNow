@@ -252,6 +252,7 @@
             booking.BookingId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
             booking.Status.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
             booking.Carpark.CarparkId.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+            booking.Carpark.Address.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
             booking.Vehicle.LicensePlate.Contains(searchString, StringComparison.OrdinalIgnoreCase);
 
         // Item must match both filters
@@ -293,7 +294,6 @@
         model.EndTime = time;
         await UpdatePrice();
     }
-
     private async Task UpdatePrice() {
         var startDateTime = model.GetStartDateTime();
         var endDateTime = model.GetEndDateTime();
@@ -303,7 +303,6 @@
             price = await BookingService.CalculatePrice(startDateTime.Value, endDateTime.Value, model.Booking.Carpark);
         }
     }
-
     private async Task EditBooking() {
         var startDateTime = model.GetStartDateTime();
         var endDateTime = model.GetEndDateTime();
