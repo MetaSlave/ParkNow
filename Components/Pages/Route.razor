@@ -191,14 +191,20 @@
 
             // Load Leaflet first, then Routing Machine
             await JSRuntime.InvokeVoidAsync("loadScript", "/js/leaflet/leaflet.js");
+            Logger.LogInformation("Loaded Leaflet");
             await JSRuntime.InvokeVoidAsync("loadScript", "/js/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.js");
+            Logger.LogInformation("Loaded Leaflet Routing");
             await JSRuntime.InvokeVoidAsync("loadScript", "/js/location.js");
+            Logger.LogInformation("Loaded Location");
 
             // Get location
             await GetUserLocation();
 
+            Logger.LogInformation("Get User Location");
+
             // Initialize map after scripts are loaded
             await InitializeMapAsync();
+            Logger.LogInformation("Map Initialized");
         }
         catch (Exception ex)
         {
