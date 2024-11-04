@@ -10,6 +10,7 @@ public interface IBookingService
 
     // CRUD
     Task<bool> CreateBooking(Booking booking);
+    Task<bool> CreateBooking(Booking booking, Voucher voucher);
     Task<List<Booking>> GetUserBookings(string username);
     Task<Booking> GetBooking(int BookingId);
     Task<bool> UpdateBooking(Booking booking);

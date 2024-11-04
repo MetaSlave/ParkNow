@@ -8,131 +8,141 @@
 @attribute [Authorize]
 
 <PageTitle>My Bookings</PageTitle>
-<AuthorizeView>
-    <Authorized> 
-        <MudPaper Height="600px" Width="100%">
-            <MudContainer style=@bookingView Fixed="true">
-                <div class="d-flex flex-row align-center justify-center pt-4 pb-4">
-                    <MudText class="mr-2"Typo="Typo.h6">Your Bookings</MudText>
-                    <MudSpacer/>
-                </div>
-                <div style="height: 500px; overflow: auto;">
-                    <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" Virtualize="true" LoadingProgressColor="Color.Info" Class="overflow-auto" Filter="new Func<Booking,bool>(FilterFunc)">
-                        <ToolBarContent>
-                            <div class="d-flex flex-row gap-4 align-center justify-center" style="width: 100%;">
-                                <MudTextField @bind-Value="searchString" 
-                                    Placeholder="Search"
-                                    Label=" " 
-                                    Adornment="Adornment.End" 
-                                    AdornmentIcon="@Icons.Material.Filled.Search"
-                                    Clearable="true"
-                                    IconSize="Size.Medium"/>
-                                <MudSpacer/>
-                                <MudDatePicker 
-                                    Label="From" 
-                                    Color="Color.Secondary"
-                                    Clearable="true"
-                                    DateChanged="OnStartDateRangeChanged"/>
-                                <MudDatePicker 
-                                    Label="To" 
-                                    Color="Color.Secondary"
-                                    Clearable="true"
-                                    DateChanged="OnEndDateRangeChanged"/>
-                            </div>
-                        </ToolBarContent>
-                        <RowTemplate Context="col">
-                            <div class="d-flex flex-row align-center justify-start gap-2 pt-4 pb-4">
-                                <MudIconButton class="ml-2" Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleExpand(col))" Size="Size.Medium"/>
-                                <MudIcon class="mr-4" Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
-                                <MudText Style="">Booking #@col.BookingId</MudText>
-                                <MudSpacer></MudSpacer>
-                                <div class="d-flex flex-column flex-sm-row align-end justify-center gap-2 mr-6">
-                                    <MudChip T="string" Color="@(GetStatusColor(col.Status))" Size="Size.Medium">@col.Status</MudChip>
-                                    @if (col.Status == Booking.Statuses.Active) {
-                                        <MudButton OnClick="@(() => OpenBookingInfoAsync(col))" EndIcon="@Icons.Material.Filled.StopCircle" IconSize="Size.Small">End</MudButton>
-                                    }
-                                    else if (col.Status != Booking.Statuses.Completed) {
-                                        <MudButton OnClick="@(() => EditBookingView(col))" EndIcon="@Icons.Material.Filled.Edit" IconSize="Size.Small">Edit</MudButton>
-                                    }
-                                </div>
-                            </div>
-                        </RowTemplate>
-                        <ChildRowContent Context="col">
-                            @if (expandedRows.Contains(col)) {
-                                <MudTr>
-                                    <MudCard Elevation="0">
-                                        <MudCardContent Style="max-height: 200px; overflow-y: auto;">
-                                            <div class="d-flex flex-column gap-4">
-                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
-                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Carpark ID:</MudText>
-                                                    <MudText Style="flex: 1;">@col.Carpark.CarparkId</MudText>
-                                                </div>
-                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
-                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Carpark Address:</MudText>
-                                                    <MudText Style="flex: 1;">@col.Carpark.Address</MudText>
-                                                </div>
-                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
-                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Vehicle:</MudText>
-                                                    <MudText Style="flex: 1;">@col.Vehicle.LicensePlate</MudText>
-                                                </div>
-                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
-                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Booking Time:</MudText>
-                                                    <MudText Style="flex: 1;">@col.BookingTime.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
-                                                </div>
-                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
-                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Start Time:</MudText>
-                                                    <MudText Style="flex: 1;">@col.StartTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
-                                                </div>
-                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
-                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">End Time:</MudText>
-                                                    <MudText Style="flex: 1;">@col.EndTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
-                                                </div>
-                                                <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
-                                                    <MudText Class="font-weight-bold" Style="min-width: 140px;">Cost:</MudText>
-                                                    <MudText Style="flex: 1;">$@col.Cost.ToString("F2")</MudText>
-                                                </div>
-                                            </div>
-                                        </MudCardContent>
-                                    </MudCard>
-                                </MudTr>
+<MudPaper>
+    <MudContainer style=@bookingView Fixed="true">
+        <MudCard Elevation="0">
+            <MudCardHeader>
+                <MudText Typo="Typo.h5">Your Bookings</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="searchString" 
+                            Placeholder="Search"
+                            Label=" " 
+                            Adornment="Adornment.End" 
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            Clearable="true"
+                            IconSize="Size.Medium"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudDatePicker Label="From" 
+                        Color="Color.Secondary"
+                        Clearable="true"
+                        DateChanged="OnStartDateRangeChanged"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudDatePicker Label="To" 
+                            Color="Color.Secondary"
+                            Clearable="true"
+                            DateChanged="OnEndDateRangeChanged"/>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+        <div class="mt-5" style="height: 500px; overflow: auto;">
+            <MudTable Items="@User_Bookings" Hover="true" Breakpoint="Breakpoint.Sm" Virtualize="true" LoadingProgressColor="Color.Info" Class="overflow-auto" Filter="new Func<Booking,bool>(FilterFunc)">
+                <RowTemplate Context="col">
+                    <div class="d-flex flex-row align-center justify-start gap-2 pt-4 pb-4">
+                        <MudIconButton class="ml-2" Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleExpand(col))" Size="Size.Medium"/>
+                        <MudIcon class="mr-4" Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
+                        <MudText Style="">Booking #@col.BookingId</MudText>
+                        <MudSpacer></MudSpacer>
+                        <div class="d-flex flex-column flex-sm-row align-end justify-center gap-2 mr-6">
+                            <MudChip T="string" Color="@(GetStatusColor(col.Status))" Size="Size.Medium">@col.Status</MudChip>
+                            @if (col.Status == Booking.Statuses.Active) {
+                                <MudButton OnClick="@(() => OpenBookingInfoAsync(col))" EndIcon="@Icons.Material.Filled.StopCircle" IconSize="Size.Small">End</MudButton>
                             }
-                        </ChildRowContent>
-                    </MudTable>
-                </div>
-            </MudContainer>
-            <MudContainer style="@editBookingView" Fixed="true">
-                <div class="d-flex flex-row align-center justify-center pt-4 pb-4">
-                    <MudText class="mr-2"Typo="Typo.h6">Edit Booking</MudText>
-                    <MudSpacer></MudSpacer>
-                    <MudButton OnClick="SwapBookingView" Variant="Variant.Filled" Color="Color.Secondary">Back</MudButton>
-                </div>
-                <div class="d-flex flex-column align-center justify-center pt-4">
-                    <MudIcon Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
-                    <EditForm class="pt-4" FormName="editBooking" Model="@model" OnValidSubmit="EditBooking">
-                    <ChildContent Context="formcontext"> 
-                        <DataAnnotationsValidator/>
-                        <div class="d-flex flex-column align-center justify-center gap-4">
-                            <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-2">
-                                <MudTimePicker Color="Color.Secondary" Time="@model.StartTime" MinuteSelectionStep="1" OpenTo="OpenTo.Minutes" TimeChanged="@(time => UpdateStartTime(time))"/>
-                                <MudTimePicker Color="Color.Secondary" Time="@model.EndTime" MinuteSelectionStep="1" OpenTo="OpenTo.Minutes" TimeChanged="@(time => UpdateEndTime(time))"/>
-                            </div>
-                            <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
-                                <MudDatePicker Color="Color.Secondary" Date="@model.StartDate" DateChanged="@(date => UpdateStartDate(date))"/>
-                                <MudDatePicker Color="Color.Secondary" Date="@model.EndDate" DateChanged="@(date => UpdateEndDate(date))"/>
-                            </div>
-                            <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText>
-                            <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
-                                <MudStaticButton FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary">Change</MudStaticButton>
-                                <MudButton OnClick="DeleteBooking" Variant="Variant.Filled" Color="Color.Error">Delete</MudButton>
-                            </div>
+                            else if (col.Status != Booking.Statuses.Completed) {
+                                <MudButton OnClick="@(() => EditBookingView(col))" EndIcon="@Icons.Material.Filled.Edit" IconSize="Size.Small">Edit</MudButton>
+                            }
                         </div>
-                    </ChildContent>
-                    </EditForm>
+                    </div>
+                </RowTemplate>
+                <ChildRowContent Context="col">
+                    @if (expandedRows.Contains(col)) {
+                        <MudTr>
+                            <MudCard Elevation="0">
+                                <MudCardContent Style="max-height: 200px; overflow-y: auto;">
+                                    <div class="d-flex flex-column gap-4">
+                                        <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                            <MudText Class="font-weight-bold" Style="min-width: 140px;">Carpark ID:</MudText>
+                                            <MudText Style="flex: 1;">@col.Carpark.CarparkId</MudText>
+                                        </div>
+                                        <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                            <MudText Class="font-weight-bold" Style="min-width: 140px;">Carpark Address:</MudText>
+                                            <MudText Style="flex: 1;">@col.Carpark.Address</MudText>
+                                        </div>
+                                        <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                            <MudText Class="font-weight-bold" Style="min-width: 140px;">Vehicle:</MudText>
+                                            <MudText Style="flex: 1;">@col.Vehicle.LicensePlate</MudText>
+                                        </div>
+                                        <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                            <MudText Class="font-weight-bold" Style="min-width: 140px;">Booking Time:</MudText>
+                                            <MudText Style="flex: 1;">@col.BookingTime.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
+                                        </div>
+                                        <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                            <MudText Class="font-weight-bold" Style="min-width: 140px;">Start Time:</MudText>
+                                            <MudText Style="flex: 1;">@col.StartTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
+                                        </div>
+                                        <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                            <MudText Class="font-weight-bold" Style="min-width: 140px;">End Time:</MudText>
+                                            <MudText Style="flex: 1;">@col.EndTime?.ToString("dd MMMM yyyy hh:mm tt ")</MudText>
+                                        </div>
+                                        <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                            <MudText Class="font-weight-bold" Style="min-width: 140px;">Cost:</MudText>
+                                            <MudText Style="flex: 1;">$@col.Cost.ToString("F2")</MudText>
+                                        </div>
+                                        @if (col.Payment.Voucher != null) {
+                                            <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                <MudText Class="font-weight-bold" Style="min-width: 140px;">Voucher:</MudText>
+                                                <MudText Style="flex: 1;">$@col.Payment.Voucher.VoucherId.ToString()</MudText>
+                                            </div>
+                                            <div class="d-flex" style="word-wrap: break-word; white-space: normal;">
+                                                <MudText Class="font-weight-bold" Style="min-width: 140px;">Discount:</MudText>
+                                                <MudText Style="flex: 1;">$@col.Payment.Voucher.Amount.ToString("F2")</MudText>
+                                            </div>
+                                        }
+                                    </div>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudTr>
+                    }
+                </ChildRowContent>
+            </MudTable>
+        </div>
+    </MudContainer>
+    <MudContainer style="@editBookingView" Fixed="true">
+        <div class="d-flex flex-row align-center justify-center pt-4 pb-4">
+            <MudText class="mr-2"Typo="Typo.h6">Edit Booking</MudText>
+            <MudSpacer></MudSpacer>
+            <MudButton OnClick="SwapBookingView" Variant="Variant.Filled" Color="Color.Secondary">Back</MudButton>
+        </div>
+        <div class="d-flex flex-column align-center justify-center pt-4 pb-4">
+            <MudIcon Icon="@Icons.Material.Filled.LocalParking" Size="Size.Large"></MudIcon>
+            <EditForm class="pt-4" FormName="editBooking" Model="@model" OnValidSubmit="EditBooking">
+            <ChildContent Context="formcontext"> 
+                <DataAnnotationsValidator/>
+                <div class="d-flex flex-column align-center justify-center gap-4">
+                    <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-2">
+                        <MudTimePicker Color="Color.Secondary" Time="@model.StartTime" MinuteSelectionStep="1" OpenTo="OpenTo.Minutes" TimeChanged="@(time => UpdateStartTime(time))"/>
+                        <MudTimePicker Color="Color.Secondary" Time="@model.EndTime" MinuteSelectionStep="1" OpenTo="OpenTo.Minutes" TimeChanged="@(time => UpdateEndTime(time))"/>
+                    </div>
+                    <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
+                        <MudDatePicker Color="Color.Secondary" Date="@model.StartDate" DateChanged="@(date => UpdateStartDate(date))"/>
+                        <MudDatePicker Color="Color.Secondary" Date="@model.EndDate" DateChanged="@(date => UpdateEndDate(date))"/>
+                    </div>
+                    <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText>
+                    <div class="d-flex justify-center align-center flex-row flex-grow-1 gap-4 mt-4">
+                        <MudStaticButton FormAction="FormAction.Submit" Variant="Variant.Filled" Color="Color.Secondary">Change</MudStaticButton>
+                        <MudButton OnClick="DeleteBooking" Variant="Variant.Filled" Color="Color.Error">Delete</MudButton>
+                    </div>
                 </div>
-            </MudContainer>
-        </MudPaper>
-    </Authorized> 
-</AuthorizeView>
+            </ChildContent>
+            </EditForm>
+        </div>
+    </MudContainer>
+</MudPaper>
 
 
 @code {

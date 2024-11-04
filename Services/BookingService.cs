@@ -48,6 +48,7 @@ public class BookingService : IBookingService
                 Status = Payment.Statuses.Success
             };
             await _context.Payments.AddAsync(temp_pay);
+            booking.Payment = temp_pay;
             await _context.SaveChangesAsync();
             return true;
        }
@@ -57,6 +58,31 @@ public class BookingService : IBookingService
             return false;
        }
     }
+
+    public async Task<bool> CreateBooking(Booking booking, Voucher voucher) {
+       try {
+            // Add Booking and Payment
+            await _context.Bookings.AddAsync(booking);
+            await _context.SaveChangesAsync();
+            Payment temp_pay = new Payment{
+                Voucher = voucher,
+                Booking = booking,
+                Timestamp = DateTime.Now,
+                Amount = booking.Cost,
+                Status = Payment.Statuses.Success
+            };
+            await _context.Payments.AddAsync(temp_pay);
+            booking.Payment = temp_pay;
+            await _context.SaveChangesAsync();
+            return true;
+       }
+       catch (Exception e){
+            _logger.LogInformation(e.Message);
+            _logger.LogInformation(e.InnerException.Message);
+            return false;
+       }
+    }
+
     public async Task<bool> UpdateBooking(Booking booking) {
        try {
             // Add Booking

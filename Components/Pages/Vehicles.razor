@@ -22,7 +22,7 @@
                 <div class="d-flex flex-row align-center justify-center pt-4 pb-4">
                     <MudText class="mr-2"Typo="Typo.h6">Your Vehicles</MudText>
                     <MudSpacer/>
-                    <MudButton OnClick="SwapCreateVehicleView" Variant="Variant.Filled" Color="Color.Secondary">Add Vehicle</MudButton>
+                    <MudButton OnClick="SwapCreateVehicleView" Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add">Add Vehicle</MudButton>
                 </div>
                 <MudTable Items="@User_Vehicles" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
                     <RowTemplate Context="col">

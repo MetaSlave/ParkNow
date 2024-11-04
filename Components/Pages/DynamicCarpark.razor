@@ -6,6 +6,7 @@
 @inject IJSRuntime JSRuntime
 @inject ICarparkService CarparkService
 @inject IVehicleService VehicleService
+@inject IVoucherService VoucherService
 @inject IBookingService BookingService
 @inject IUserService UserService
 @inject ISnackbar Snackbar
@@ -16,6 +17,7 @@
 <link rel="stylesheet" href="js/leaflet/leaflet.css" />
 <script src="js/leaflet/leaflet.js"></script>
 <style>
+/* Ensures DatePicker popover is centered */
 .mud-popover:has(.mud-picker) {
     position: fixed !important;
     top: 50% !important;
@@ -93,16 +95,32 @@
                                 Variant="@Variant.Text" />
                         </MudItem>
                     </MudGrid>
-                    <MudTextField @bind-Value="model2.VoucherId"
-                        Label="Voucher" 
-                        T="string" />
+                    <div class="d-flex align-center justify-center gap-4">
+                        <MudTextField @bind-Value="model2.VoucherId"
+                            Label="Voucher" 
+                            T="string"
+                            TextChanged="OnVoucherIdChanged"/>
+                        @if (isVoucherValid == true)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" 
+                                Color="Color.Success" 
+                                Size="Size.Medium"
+                                Class="ml-2 mt-4"/>
+                        }
+                        else {
+                            <MudIcon Icon="@Icons.Material.Filled.Cancel" 
+                                Color="Color.Error" 
+                                Size="Size.Medium"
+                                Class="ml-2 mt-4"/>
+                        }
+                    </div>
                     <MudSpacer/>
                     <div>
                         @if (price <= 0M) {
                             <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">Parking Unavailable</MudText>
                         }
                         else {
-                            <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@price</MudText>
+                            <MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">$@(price - discount)</MudText>
                         }
                     </div>
                 </MudCardContent>
@@ -142,10 +160,12 @@
     public Carpark Carpark = null;
     private List<Vehicle> Vehicles = new List<Vehicle>();
     private decimal price = 0;
+    private decimal discount = 0;
     private string? username;
     private string bookView = "display:block;";
     private string payView = "display:none;";
     private string completedView = "display:none;";
+    private bool isVoucherValid = false;
 
     [SupplyParameterFromForm]
     private BookingForm model { get; set; } = new();
@@ -243,6 +263,20 @@
         await UpdatePrice();
     }
 
+    private async Task OnVoucherIdChanged() {
+        if (model2.VoucherId != null) {
+            var result = await VoucherService.VerifyVoucher(username, model2.VoucherId);
+            if (result.success) {
+                isVoucherValid = true;
+                discount = result.amount;
+            }
+            else {
+                isVoucherValid = false;
+                discount = 0;
+            }
+        }
+    }
+
     private async Task UpdatePrice() {
         var startDateTime = model.GetStartDateTime();
         var endDateTime = model.GetEndDateTime();
@@ -282,8 +316,15 @@
             Cost = price,
             Status = Booking.Statuses.Scheduled
         };
+
         // Create New Booking Creates Payment as Well
-        bool createsuccess = await BookingService.CreateBooking(temp);
+        bool createsuccess;
+        if (isVoucherValid) {
+            createsuccess = await BookingService.CreateBooking(temp, await VoucherService.GetVoucher(model2.VoucherId));
+        }
+        else {
+            createsuccess = await BookingService.CreateBooking(temp);
+        }
         if (createsuccess) {
             Snackbar.Add("Booking successful!", Severity.Success);
             bookView = "display:none";
