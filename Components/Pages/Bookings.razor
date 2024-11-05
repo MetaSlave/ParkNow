@@ -262,6 +262,7 @@
     private void SwapBookingView() {  
         bookingView = "display:block;";
         editBookingView = "display:none;";
+        model = new();
         StateHasChanged();
     }
     private void EditBookingView(Booking booking) {  

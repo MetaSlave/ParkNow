@@ -15,10 +15,7 @@ public class Booking {
         Scheduled,
     }
     public int BookingId {get; set;}
-
-    [ForeignKey("PaymentId")]
     public Payment? Payment {get; set;}
-
     public string Username { get; set; } 
 
     [ForeignKey(nameof(Username))]

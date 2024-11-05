@@ -122,7 +122,6 @@ public class BookingService : IBookingService
             if (db_Booking == null || db_Payment == null) {
                 return false;
             }
-            _context.Payments.Remove(db_Payment);
             _context.Bookings.Remove(db_Booking);
             await _context.SaveChangesAsync();
        }

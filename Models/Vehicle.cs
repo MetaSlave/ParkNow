@@ -16,7 +16,7 @@ public class Vehicle {
         PublicService
     }
     public int VehicleId {get; set;}
-    public string Username { get; set; } 
+    public string Username { get; set; }
     [ForeignKey(nameof(Username))]
     [DeleteBehavior(DeleteBehavior.NoAction)]
     public required User User {get; set;}
