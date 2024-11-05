@@ -123,8 +123,12 @@
     }
     private async void ChangePassword() 
     {
-        await UserService.ChangePassword(username, model.OldPassword, model.NewPassword);
-        Snackbar.Add("Password successfully changed", Severity.Success);
+        if (await UserService.ChangePassword(username, model.OldPassword, model.NewPassword)) {
+            Snackbar.Add("Password successfully changed", Severity.Success);
+        }
+        else {
+            Snackbar.Add("Old password is wrong or new passwords do not match", Severity.Error);
+        }
         SwapProfileView();
     }
     private void TogglePasswordEdit()

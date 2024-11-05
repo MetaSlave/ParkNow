@@ -3,18 +3,357 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
+<style>
+    /* styles.css */
+:root {
+    --primary-color: #22c55e;
+    --primary-hover: #16a34a;
+    --background-light: #f0fdf4;
+    --text-dark: #1f2937;
+    --text-light: #4b5563;
+}
 
+.landing-page {
+    background: linear-gradient(180deg, #ffffff 0%, var(--background-light) 100%);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 0;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo {
+    width: 2.5rem;
+    height: 3rem;
+    background-color: #bbf7d0;
+    border-radius: 0.5rem;
+    position: relative;
+}
+
+.logo-lines {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.line {
+    width: 0.25rem;
+    height: 100%;
+    background-color: white;
+    margin: 0 0.125rem;
+}
+
+.line:first-child {
+    transform: skewX(12deg);
+}
+
+.line:last-child {
+    transform: skewX(-12deg);
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-link {
+    color: var(--text-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    color: var(--text-dark);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--background-light);
+}
+
+/* Hero Section */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4rem 0;
+}
+
+.hero-image {
+    width: 24rem;
+    height: 24rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-content {
+    max-width: 36rem;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    color: var(--text-dark);
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.hero-image {
+    width: 24rem;
+    height: 24rem;
+    position: relative;
+}
+
+.image-bg {
+    position: absolute;
+    inset: 0;
+    background-color: #bbf7d0;
+    border-radius: 50%;
+    opacity: 0.2;
+}
+
+.image-container {
+    position: absolute;
+    inset: 2rem;
+    background-color: #dcfce7;
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.image-container i {
+    font-size: 4rem;
+    color: var(--primary-color);
+}
+
+/* Features Section */
+.features {
+    background-color: white;
+    padding: 4rem 0;
+}
+
+.features h2 {
+    font-size: 1.875rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--text-dark);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.feature-card {
+    background-color: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    transition: box-shadow 0.2s;
+}
+
+.feature-card:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.feature-icon {
+    background-color: white;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.feature-icon i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.feature-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.feature-card p {
+    color: var(--text-light);
+}
+</style>
 <AuthorizeView>
     <NotAuthorized>
-        <div style="display: flex; flex-direction: column; justify-content: center;">
-            <MudText Typo="Typo.h2" style="margin-top:3%;"Align="Align.Center" Class="mb-3">Welcome to</MudText>
-                <MudImage Src="/images/parknow_logo.png" 
-                    Alt="Parknow Logo"
-                    Elevation="0" 
-                    Class="rounded-lg align-self-center"
-                    Style="max-width: min(500px, 80%); height: auto;"/>
-            <MudText Typo="Typo.body1" Align="Align.Center" Class="mt-3">Your ultimate parking solution</MudText>
-        </div>
+    <div class="min-h-screen landing-page">
+                <!-- Hero Section -->
+                <div class="hero container">
+                    <div class="hero-content">
+                        <h1>Find Perfect Parking in Seconds</h1>
+                        <p>Your ultimate parking solution that helps you discover, book, and pay for parking spots instantly across the city.</p>
+                        <div class="button-group">
+                            <MudButton Variant="Variant.Filled" Color="Color.Secondary" Href="/Account/Login" Class="btn-primary" StartIcon="@Icons.Material.Filled.DirectionsCar">
+                                Start Parking Now
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Href="/Guide" Class="btn-secondary">
+                                Learn More
+                            </MudButton>
+                        </div>
+                    </div>
+                    <div class="flex-d justify-center align-center ml-10 d-none d-md-flex">
+                        <MudImage
+                            Src="/images/parknow_logo.png" 
+                            Class="ml-20"
+                            Width="600"
+                            Style="max-width: 70%; max-height: 70%; object-fit: contain;" />
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="features">
+                    <div class="container">
+                        <h2>Why Choose ParkNow?</h2>
+                            <MudGrid Spacing="4" Class="mt-8">
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudPaper Elevation="0" Class="pa-4 h-100" Style="background-color: #f9fafb; transition: all 0.3s;">
+                                        <div class="d-flex flex-column align-center">
+                                            <MudIcon Icon="@Icons.Material.Filled.Timer" 
+                                                    Color="Color.Secondary" 
+                                                    Size="Size.Large" 
+                                                    Class="mb-4" 
+                                                    Style="width: 48px; height: 48px;"/>
+                                            <MudText Typo="Typo.h6" 
+                                                    Class="mb-2 text-center">
+                                                Real-Time Availability
+                                            </MudText>
+                                            <MudText Typo="Typo.body1" 
+                                                    Class="text-center">
+                                                Find available parking spots in real-time, saving you valuable time and fuel.
+                                            </MudText>
+                                        </div>
+                                    </MudPaper>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudPaper Elevation="0" Class="pa-4 h-100" Style="background-color: #f9fafb; transition: all 0.3s;">
+                                        <div class="d-flex flex-column align-center">
+                                            <MudIcon Icon="@Icons.Material.Filled.Payment" 
+                                                    Color="Color.Secondary" 
+                                                    Size="Size.Large" 
+                                                    Class="mb-4" 
+                                                    Style="width: 48px; height: 48px;"/>
+                                            <MudText Typo="Typo.h6" 
+                                                    Class="mb-2 text-center">
+                                                Easy Payment
+                                            </MudText>
+                                            <MudText Typo="Typo.body1" 
+                                                    Class="text-center">
+                                                Seamless payment process with multiple options including credit cards and mobile payments.
+                                            </MudText>
+                                        </div>
+                                    </MudPaper>
+                                </MudItem>
+
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudPaper Elevation="0" Class="pa-4 h-100" Style="background-color: #f9fafb; transition: all 0.3s;">
+                                        <div class="d-flex flex-column align-center">
+                                            <MudIcon Icon="@Icons.Material.Filled.LocalParking" 
+                                                    Color="Color.Secondary" 
+                                                    Size="Size.Large" 
+                                                    Class="mb-4" 
+                                                    Style="width: 48px; height: 48px;"/>
+                                            <MudText Typo="Typo.h6" 
+                                                    Class="mb-2 text-center">
+                                                Guaranteed Spots
+                                            </MudText>
+                                            <MudText Typo="Typo.body1" 
+                                                    Class="text-center">
+                                                Book your parking spot in advance and never worry about finding parking again.
+                                            </MudText>
+                                        </div>
+                                    </MudPaper>
+                                </MudItem>
+                            </MudGrid>
+
+                            <style>
+                                .mud-paper {
+                                    border-radius: 0.75rem;
+                                }
+                                .mud-paper:hover {
+                                    transform: translateY(-2px);
+                                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                                }
+                            </style>
+                    </div>
+                </div>
+            </div>
     </NotAuthorized>
     <Authorized> 
         <div class="mt-8 d-flex justify-center align-center flex-column flex-grow-1 gap-4 mb-4">
