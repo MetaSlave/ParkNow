@@ -31,7 +31,7 @@ public interface IBookingService
     Task<Booking> GetBooking(int bookingId);
     /*
     Update booking information, updates starttime, endtime, cost and status
-    Returns true if Booking entity successfully update or false if not
+    Returns true if Booking entity successfully updated or false if not
     */ 
     Task<bool> UpdateBooking(Booking booking);
     /*
@@ -44,8 +44,8 @@ public interface IBookingService
     /*
     Calculates price for a specific time range and carpark
     Returns a decimal if a price can be calculated or null if the carpark does not allow parking in the time range
-    */ 
-    Decimal CalculatePrice(DateTime start, DateTime end, Carpark carpark);
+    */
+    decimal CalculatePrice(DateTime start, DateTime end, Carpark carpark);
 
     
 }

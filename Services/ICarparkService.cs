@@ -5,7 +5,7 @@ namespace ParkNow.Services;
 This interface implements the methods of the Carpark entity
 GetAllCarparks, GetCarpark
 
-This entity requires only READ operations
+This entity has only READ operations
 */
 public interface ICarparkService
 {
