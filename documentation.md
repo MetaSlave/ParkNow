@@ -16,3 +16,6 @@
   - [UserModel](documentation/UserModel.md)
   - [VehicleModel](documentation/VehicleModel.md)
   - [VoucherModel](documentation/VoucherModel.md)
+
+### OtherMethods
+  - [OtherMethods](documentation/OtherMethods.md)
