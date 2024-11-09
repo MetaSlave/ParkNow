@@ -40,6 +40,8 @@ Validates each payment with a few checks.
 
 ## Map
 
+> See complete implementations at `ParkNow.Pages.Map`
+
 ### Distance Calculation
 ```csharp
 private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
