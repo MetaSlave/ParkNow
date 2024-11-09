@@ -114,5 +114,5 @@ https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-
 python populateCarpark.py
 ```
 
-# [Documentation](https://github.com/MetaSlave/ParkNow/edit/main/documentation.md)
+# [Documentation](https://github.com/MetaSlave/ParkNow/blob/main/documentation.md)
 
