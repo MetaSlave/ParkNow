@@ -26,19 +26,23 @@
 }
 </style>
 
-<div class="mt-8 d-flex justify-center align-center flex-column flex-grow-1 gap-4">
-    <MudText class="mr-2"Typo="Typo.h6">
-        @if (Carpark != null) {
-            @("Carpark: " + carparkid)
-        }
-    </MudText>
-    <MudText class="mr-2"Typo="Typo.h6">
-        @if (Carpark != null) {
-            @Carpark.Address 
-        }
-    </MudText>
-    <div id="map" style="height: 325px;width: 325px;"> </div>
-    <div style="@bookView">
+<div class="mt-8 d-flex justify-center align-center flex-sm-row flex-column flex-grow-1 gap-4">
+    <div class="d-flex justify-center align-center flex-column">
+        <MudText class="mr-2"Typo="Typo.h6">
+            @if (Carpark != null) {
+                @("Carpark: " + carparkid)
+            }
+        </MudText>
+        <MudText class="mr-2"Typo="Typo.h6">
+            @if (Carpark != null) {
+                @Carpark.Address 
+            }
+        </MudText>
+
+        <div id="map" style="height: 325px;width: 325px;"> </div>
+    </div>
+
+    <div style="@bookView" class="mt-md-10">
         <EditForm FormName="book" Model="@model" OnSubmit="Book">
             <DataAnnotationsValidator/>
                 <MudCard style="height: 300px;width: 325px;">
@@ -69,7 +73,7 @@
                 </MudCard>
         </EditForm>
     </div>
-    <div style="@payView">
+    <div style="@payView" class="mt-md-10">
         <EditForm FormName="book" Model="@model2" OnSubmit="Pay">
             <DataAnnotationsValidator/>
             <MudCard style="height: 300px;width: 325px;">
@@ -131,7 +135,7 @@
             </MudCard>
         </EditForm>
     </div>
-    <div style="@completedView">
+    <div style="@completedView" class="mt-md-10">
         <MudCard style="height: 300px;width: 325px;">
             <MudCardContent>
                 <div><MudText Align="Align.Center" Typo="Typo.h6" class="mt-5">Your booking has been confirmed!</MudText></div>
