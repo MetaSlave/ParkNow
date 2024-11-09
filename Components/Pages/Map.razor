@@ -8,7 +8,7 @@
 @inject NavigationManager NavigationManager
 @inject ILogger<Map> Logger
 
-<PageTitle>Nearby Carparks</PageTitle>
+<PageTitle>Map</PageTitle>
 
 <style>
     .user-location-marker {
@@ -231,7 +231,8 @@
         }
         return $"{timeSpan.Seconds}s";
     }
-    private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+   
+   private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
         // Calculate distance using lat and lon
         const double R = 6371;
@@ -244,6 +245,7 @@
         return R * c * 1000;
     }
     private double ToRad(double degrees) => degrees * Math.PI / 180;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender) {
